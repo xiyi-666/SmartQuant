@@ -11,6 +11,8 @@ import { useLangText } from "../shared/language";
 import { isMarketTradingSession, useMarket } from "../shared/market";
 import { readUserPageCache, userScopedStorageKey, writeUserPageCache } from "../shared/pageCache";
 import { useTheme } from "../shared/theme";
+import { COMMUNITY_EDITION } from "../shared/edition";
+import CommunityFeatureNotice from "../components/CommunityFeatureNotice";
 
 type LangTextFn = (zh: string, en: string) => string;
 
@@ -427,7 +429,7 @@ function buildClientErrorResult(message: string): Result {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function AiInsightsPage() {
+function AiInsightsPageFull() {
   const lt = useLangText();
   const { market, definition } = useMarket();
   const { theme } = useTheme();
@@ -2104,6 +2106,20 @@ const risingRatio = marketBreadthTotal
       />
     </div>
   );
+}
+
+export default function AiInsightsPage() {
+  const lt = useLangText();
+  if (COMMUNITY_EDITION) {
+    return (
+      <CommunityFeatureNotice
+        title={lt("AI 市场洞察", "AI Market Insights")}
+        description={lt("社区版保留模块入口，但不提供平台内置的 AI 市场洞察能力。", "The module remains visible, but built-in AI market insights are not included in the community edition.")}
+        detail={lt("你可以在自己的部署环境接入 AI 服务，并自行实现市场分析、评分和策略逻辑。", "Connect your own AI service in your deployment to implement market analysis, scoring, and strategy logic.")}
+      />
+    );
+  }
+  return <AiInsightsPageFull />;
 }
 
 // ─── Alpha Card Sub-component ────────────────────────────────────────────────

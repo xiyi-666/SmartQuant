@@ -21,6 +21,8 @@ import { useLanguage, useLangText } from "../shared/language";
 import { MARKET_DEFINITIONS, normalizeMarket, useMarket } from "../shared/market";
 import { readUserPageCache, userScopedStorageKey, writeUserPageCache } from "../shared/pageCache";
 import { useTheme } from "../shared/theme";
+import { COMMUNITY_EDITION } from "../shared/edition";
+import CommunityFeatureNotice from "../components/CommunityFeatureNotice";
 
 type SmartResearchResult = {
   task_id?: number;
@@ -435,7 +437,7 @@ function ResearchCharts({ item }: { item?: SmartResearchItem }) {
   );
 }
 
-export default function SmartResearchPage() {
+function SmartResearchPageFull() {
   const lt = useLangText();
   const { lang } = useLanguage();
   const { market, definition } = useMarket();
@@ -1259,4 +1261,18 @@ export default function SmartResearchPage() {
       />
     </div>
   );
+}
+
+export default function SmartResearchPage() {
+  const lt = useLangText();
+  if (COMMUNITY_EDITION) {
+    return (
+      <CommunityFeatureNotice
+        title={lt("智能研究", "Smart Research")}
+        description={lt("社区版保留模块入口，但不提供平台内置的智能研究与多 Agent 编排。", "The module remains visible, but built-in smart research and multi-agent orchestration are not included in the community edition.")}
+        detail={lt("请在自己的环境中接入数据源和 AI 工作流，按需搭建研究流程。", "Connect your own data sources and AI workflow in your deployment to build the research process you need.")}
+      />
+    );
+  }
+  return <SmartResearchPageFull />;
 }

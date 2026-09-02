@@ -39,6 +39,7 @@ import { aiModelOptionLabel, AiModelInput, useAiModelSelection } from "../shared
 import { useLanguage } from "../shared/language";
 import { MARKET_DEFINITIONS, normalizeMarket, useMarket } from "../shared/market";
 import { useTheme } from "../shared/theme";
+import { COMMUNITY_EDITION } from "../shared/edition";
 
 type McpServer = {
   name: string;
@@ -876,8 +877,12 @@ export default function AgentAnalysisPage() {
   }, [agentPage, agentPageCount]);
 
   const createSession = async () => {
-    if (!sessionDraft.subject.trim() || sessionDraft.agent_ids.length < 2) {
-      setError(lt("请填写讨论主题并至少选择两个分析师", "Enter a topic and select at least two analysts"));
+    const minAgents = COMMUNITY_EDITION ? 1 : 2;
+    if (!sessionDraft.subject.trim() || sessionDraft.agent_ids.length < minAgents) {
+      setError(lt(
+        COMMUNITY_EDITION ? "请填写主题并至少选择一位分析师" : "请填写讨论主题并至少选择两个分析师",
+        COMMUNITY_EDITION ? "Enter a topic and select one analyst" : "Enter a topic and select at least two analysts",
+      ));
       return;
     }
     setCreatingSession(true);
@@ -1061,11 +1066,11 @@ export default function AgentAnalysisPage() {
     <div className="agent-analysis-page">
       <header className="agent-analysis-page-header">
         <div>
-          <div className="agent-analysis-title-row">
+            <div className="agent-analysis-title-row">
             <UsersRound size={24} />
             <h1>{lt("AI 分析师", "AI Analysts")}</h1>
           </div>
-          <p>{lt("与多位金融分析师持续讨论股票、事件、情绪与组合风险", "Discuss equities, events, sentiment and portfolio risk with multiple AI analysts")}</p>
+          <p>{lt(COMMUNITY_EDITION ? "使用你配置的单一 AI 分析师研究股票、事件与组合问题" : "与多位金融分析师持续讨论股票、事件、情绪与组合风险", COMMUNITY_EDITION ? "Research equities, events and portfolio questions with your configured AI analyst" : "Discuss equities, events, sentiment and portfolio risk with multiple AI analysts")}</p>
         </div>
         <div className="agent-analysis-header-actions">
           <div className="agent-analysis-plan-chip">
@@ -1331,7 +1336,7 @@ export default function AgentAnalysisPage() {
         <div className="agent-analysis-modal-mask" onMouseDown={(event) => event.target === event.currentTarget && setShowSessionModal(false)}>
           <div className="agent-analysis-modal agent-analysis-session-modal">
             <div className="agent-analysis-modal-header">
-              <div><h2>{lt("发起 AI 分析讨论", "Start AI Analyst Discussion")}</h2><p>{lt(`当前套餐最多 ${capabilities.max_agents} 位分析师、首次 ${capabilities.max_initial_rounds} 轮`, `Your plan supports ${capabilities.max_agents} analysts and ${capabilities.max_initial_rounds} initial rounds`)}</p></div>
+              <div><h2>{lt(COMMUNITY_EDITION ? "发起单分析师研究" : "发起 AI 分析讨论", COMMUNITY_EDITION ? "Start single-analyst research" : "Start AI Analyst Discussion")}</h2><p>{lt(`当前版本最多 ${capabilities.max_agents} 位分析师、首次 ${capabilities.max_initial_rounds} 轮`, `This edition supports ${capabilities.max_agents} analyst and ${capabilities.max_initial_rounds} initial round`)}</p></div>
               <button type="button" onClick={() => setShowSessionModal(false)}><X size={18} /></button>
             </div>
             <div className="agent-analysis-modal-body">
@@ -1371,7 +1376,7 @@ export default function AgentAnalysisPage() {
                   </small>
                 </div>
               </div>
-              <div className="agent-analysis-agent-picker-head"><span>{lt("选择分析师", "Select Analysts")}</span><small>{sessionDraft.agent_ids.length}/{capabilities.max_agents}</small></div>
+              <div className="agent-analysis-agent-picker-head"><span>{lt(COMMUNITY_EDITION ? "选择一位分析师" : "选择分析师", COMMUNITY_EDITION ? "Select one analyst" : "Select Analysts")}</span><small>{sessionDraft.agent_ids.length}/{capabilities.max_agents}</small></div>
               <div className="agent-analysis-agent-picker">
                 {agents.filter((agent) => agent.enabled).map((agent) => {
                   const checked = sessionDraft.agent_ids.includes(agent.id);

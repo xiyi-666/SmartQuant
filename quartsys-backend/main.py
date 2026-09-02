@@ -5620,7 +5620,6 @@ COMMUNITY_EDITION = str(os.getenv("QUARTSYS_COMMUNITY_EDITION", "1")).strip().lo
 COMMUNITY_EXCLUDED_PREFIXES = (
     "/api/support",
     "/api/smart-research",
-    "/api/agent-analysis",
     "/api/ai-insights",
     "/api/risk/ai-assessment",
     "/api/subscription",
@@ -21329,6 +21328,15 @@ FINANCIAL_AGENT_ROLE_LIMITS: Dict[str, Dict[str, Any]] = {
 
 def _financial_agent_role_limits(role: Optional[str]) -> dict:
     normalized = normalize_user_role(role)
+    if COMMUNITY_EDITION:
+        return {
+            "role": normalized,
+            "can_create_agents": True,
+            "max_agents": 1,
+            "max_initial_rounds": 1,
+            "mcp_mode": "none",
+            "community_single_analyst": True,
+        }
     limits = FINANCIAL_AGENT_ROLE_LIMITS.get(
         normalized, FINANCIAL_AGENT_ROLE_LIMITS["normal"]
     )
@@ -21389,6 +21397,8 @@ def _agent_analysis_dynamic_credit_estimate(
     data_sources: int,
     include_moderator: bool = True,
 ) -> dict:
+    if COMMUNITY_EDITION:
+        include_moderator = False
     analysts = max(0, int(agent_count or 0))
     round_count = max(0, int(rounds or 0))
     turn_model = _llm_tier_billing_details(db, "agent_analysis_turn", model_or_tier, user)
@@ -21722,13 +21732,13 @@ def _apply_financial_agent_payload(
     row.system_prompt = system_prompt
     row.model = _financial_agent_validated_model(db, user, payload.model)
     row.tools_json = json.dumps(
-        financial_agents.normalize_tool_keys(payload.tools), ensure_ascii=False
+        [] if COMMUNITY_EDITION else financial_agents.normalize_tool_keys(payload.tools), ensure_ascii=False
     )
     row.skills_json = json.dumps(
-        financial_agents.normalize_skill_keys(payload.skills), ensure_ascii=False
+        [] if COMMUNITY_EDITION else financial_agents.normalize_skill_keys(payload.skills), ensure_ascii=False
     )
     row.mcp_servers_json = json.dumps(
-        _financial_agent_mcp_for_user(db, user, payload.mcp_servers),
+        [] if COMMUNITY_EDITION else _financial_agent_mcp_for_user(db, user, payload.mcp_servers),
         ensure_ascii=False,
     )
     row.visibility = visibility
@@ -22551,8 +22561,10 @@ def _run_agent_analysis_session(session_id: int, user_id: int) -> None:
         )
         profile_by_id = {profile.id: profile for profile in profiles}
         profiles = [profile_by_id[item] for item in selected_ids if item in profile_by_id]
-        if len(profiles) < 2:
-            raise ValueError("至少需要两个可用分析师参与讨论")
+        if len(profiles) < (1 if COMMUNITY_EDITION else 2):
+            raise ValueError(
+                "至少需要一位可用分析师" if COMMUNITY_EDITION else "至少需要两个可用分析师参与讨论"
+            )
 
         while True:
             db.refresh(session)
@@ -22687,7 +22699,12 @@ def _run_agent_analysis_session(session_id: int, user_id: int) -> None:
             if int(session.current_round or 0) >= int(session.max_rounds or 0):
                 break
 
-        _set_agent_analysis_progress(db, session, stage="投资委员会汇总结论", percent=92)
+        _set_agent_analysis_progress(
+            db,
+            session,
+            stage="生成分析摘要" if COMMUNITY_EDITION else "投资委员会汇总结论",
+            percent=92,
+        )
         transcript = _agent_analysis_messages(db, session.id)
         moderator_system, moderator_user = financial_agents.build_moderator_prompts(
             session.subject, research_context, transcript
@@ -22707,7 +22724,7 @@ def _run_agent_analysis_session(session_id: int, user_id: int) -> None:
         cfg["_usage_reference_id"] = f"agent_analysis:{session.id}:moderator"
         final_result = None
         moderator_error = ""
-        if cfg.get("api_key") and _direct_llm_supported(cfg):
+        if not COMMUNITY_EDITION and cfg.get("api_key") and _direct_llm_supported(cfg):
             try:
                 raw = _assistant_call_json_llm(
                     cfg,
@@ -22732,7 +22749,7 @@ def _run_agent_analysis_session(session_id: int, user_id: int) -> None:
             AgentAnalysisMessage(
                 session_id=session.id,
                 sender_type="moderator",
-                sender_name="投资委员会主持人",
+                sender_name="分析摘要" if COMMUNITY_EDITION else "投资委员会主持人",
                 round_no=session.current_round or 1,
                 content_markdown=final_result.get("markdown") or "",
                 blocks_json=json.dumps(final_result.get("blocks") or [], ensure_ascii=False),
@@ -22763,7 +22780,7 @@ def _run_agent_analysis_session(session_id: int, user_id: int) -> None:
         session.memory_summary = "\n".join(
             item
             for item in [
-                f"委员会决策：{final_result.get('decision') or '继续观察'}",
+                f"{'分析结论' if COMMUNITY_EDITION else '委员会决策'}：{final_result.get('decision') or '继续观察'}",
                 f"立场：{final_result.get('stance') or 'neutral'}；置信度：{final_result.get('confidence') or 0}/100；风险：{final_result.get('risk_level') or '中'}",
                 "关键结论：" + "；".join(final_result.get("key_points") or []),
                 "主要分歧：" + "；".join(final_result.get("disagreements") or []),
@@ -22893,12 +22910,13 @@ def quote_agent_analysis_session(
         context_chars=context_chars,
         data_sources=_agent_analysis_data_source_count(selected_profiles),
     )
-    eligible = bool(subject and len(agent_ids) >= 2)
+    min_agents = 1 if COMMUNITY_EDITION else 2
+    eligible = bool(subject and len(agent_ids) >= min_agents)
     reason = ""
     if not subject:
         reason = "请先填写讨论主题"
-    elif len(agent_ids) < 2:
-        reason = "至少选择两个分析师"
+    elif len(agent_ids) < min_agents:
+        reason = "至少选择一位分析师" if COMMUNITY_EDITION else "至少选择两个分析师"
     return {
         "eligible": eligible,
         "reason": reason,
@@ -22930,8 +22948,11 @@ def create_agent_analysis_session(
             continue
         if parsed not in agent_ids:
             agent_ids.append(parsed)
-    if len(agent_ids) < 2:
-        raise HTTPException(status_code=400, detail="至少选择两个分析师")
+    if len(agent_ids) < (1 if COMMUNITY_EDITION else 2):
+        raise HTTPException(
+            status_code=400,
+            detail="至少选择一位分析师" if COMMUNITY_EDITION else "至少选择两个分析师",
+        )
     if len(agent_ids) > int(limits["max_agents"]):
         raise HTTPException(
             status_code=400,

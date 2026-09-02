@@ -16,7 +16,6 @@
 - 本地回测与基础绩效指标
 - 模拟账户、交易记录和可配置佣金规则
 - 用户自定义风险指标及可选的自有 AI 接口
-- 演示模式和动画新手引导
 
 官方 AI 洞察、智能研究、AI 分析师、官方 AI 风险评估、支持工单和托管式第三方研究在社区部署中停用。源码可保留兼容接口，但不需要生产凭据或私有网关。
 
@@ -101,10 +100,6 @@ python import_security_universe.py --file ./path/to/your-universe.csv
 
 佣金公式为 `max(成交金额 × 费率, 最低佣金)`。界面使用万分比，填 `1` 代表万 1（0.01%）。模拟交易默认费率为 1、最低佣金为 5 元；管理员可按市场调整，最低佣金设为 0 即按实际费率计算。
 
-## 演示模式与新手引导
-
-两者相互独立且默认开启。管理员可在站点设置中指定测试账号并分别开关。演示账号的相同请求会优先使用浏览器缓存，减少重复调用 AI；新手引导使用步骤动画，可跳过、返回或完成。
-
 ## 测试
 
 ```bash
@@ -136,7 +131,6 @@ python -m py_compile main.py
 - 本地回測及基本績效指標
 - 模擬帳戶、交易紀錄與可設定佣金規則
 - 使用者自訂風險指標及可選的自有 AI 整合
-- 演示模式與動畫新手引導設定
 
 官方 AI 市場洞察、智能研究、AI 分析師、官方 AI 風險評估、支援工單及託管第三方研究在社群部署中停用。原始碼可保留相容介面，但不需要生產憑證或私有閘道。
 
@@ -199,10 +193,6 @@ python import_security_universe.py --file ./path/to/your-universe.csv
 
 佣金計算為 `max(成交金額 × 費率, 最低佣金)`。介面使用萬分比，填寫 `1` 代表萬 1（0.01%）。模擬交易預設費率為 1、最低佣金 5 元；管理員可按市場調整，最低佣金設為 0 即按實際費率計算。
 
-## 演示模式與新手引導
-
-兩者互相獨立且預設開啟。管理員可在站點設定中指定演示帳號並分別開關。演示帳號的回應會優先快取在瀏覽器，避免導覽時重複呼叫 AI；動畫引導可跳過、返回或完成。
-
 ## 測試與安全
 
 ```bash
@@ -233,7 +223,6 @@ gateway or hosted model service.
 - Local backtesting with basic performance metrics
 - Paper-trading accounts, records and configurable commission rules
 - User-configured risk indicators and optional user-owned AI integrations
-- Demo mode and animated onboarding settings
 
 Official AI market insight, Smart Research, AI Analysts, official AI risk
 assessment, support tickets and hosted third-party research are disabled in the
@@ -314,12 +303,6 @@ ten-thousandths: `1` means 0.01% (one basis point). Paper trading defaults to
 rate `1` and a CNY 5 minimum. Administrators can change values per market; set
 the minimum to zero to charge the actual rate without a floor.
 
-## Demo mode and onboarding
-
-These are independent settings and default to enabled. Administrators can set
-the demo username and toggle each feature in site settings. Demo responses are
-cached in the demo account's browser so a walkthrough does not repeatedly call
-an AI provider. The animated onboarding can be skipped, resumed and completed.
 
 ## Tests, security and license
 

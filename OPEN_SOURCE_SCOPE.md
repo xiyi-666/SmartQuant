@@ -9,7 +9,7 @@ This branch is the community edition of the quantitative research platform. It i
 - Factor definitions, expression validation, previews, and example factors
 - Strategy interfaces, templates, local backtesting, and basic metrics
 - Paper-trading simulation and portfolio state held in the local deployment
-- Agent and tool extension interfaces, including user-supplied model configuration
+- Single AI analyst sessions with user-supplied model configuration
 - Community deployment configuration, environment examples, tests, and documentation
 
 Risk monitoring is intentionally limited to provider data plus rules and
@@ -22,7 +22,7 @@ The following capabilities are not part of the community distribution and must b
 
 - Licensed or normalized restricted-data aggregation
 - Production prompts, proprietary scoring weights, recommendation logic, and portfolio construction
-- High-volume multi-agent research orchestration and production report pipelines
+- Multi-analyst collaboration, multi-agent orchestration, smart research, and production report pipelines
 - Model routing, cost optimization, quality evaluation, and provider failover
 - Billing, subscriptions, credit ledgers, payment processing, reward campaigns, and anti-abuse controls
 - Enterprise SSO, organization governance, audit, private gateways, private data sources, and SLA operations
@@ -30,8 +30,10 @@ The following capabilities are not part of the community distribution and must b
 
 The following API namespaces are disabled by default in the community
 deployment and return `COMMUNITY_FEATURE_UNAVAILABLE`: `/api/support`,
-`/api/smart-research`, `/api/agent-analysis`, `/api/ai-insights`, and
-`/api/risk/ai-assessment`.
+`/api/smart-research`, `/api/ai-insights`, and `/api/risk/ai-assessment`.
+The `/api/agent-analysis` namespace remains available for one user-configured
+analyst and one initial analysis round; multi-analyst collaboration and MCP
+orchestration are not included.
 
 The public interfaces may retain placeholders or compatibility contracts for these services, but the community deployment must not contain production credentials or proprietary implementations.
 

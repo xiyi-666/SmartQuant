@@ -19,9 +19,8 @@ AIQuartSmart Community Edition covers the fundamentals from market-data access t
 - Multi-factor screening, factor expressions, and strategy templates
 - Local backtesting, core performance metrics, and paper trading
 - User-defined risk rules, indicators, and AI extension interfaces
-- Independently configurable demo mode and animated onboarding
 
-The community edition does not include official AI market insights, smart research, AI analysts, official AI risk assessment, licensed-data aggregation, subscriptions, payments, or enterprise SLAs. For the complete product, visit the [Official Full Edition](https://www.goldenaiquant.cn/), or connect your own services in your deployment.
+The community edition does not include official AI market insights, smart research, multi-analyst collaboration, AI risk assessment, licensed-data aggregation, subscriptions, payments, or enterprise SLAs. It retains a single AI analyst entry for user-configured models and prompts. For the complete product, visit the [Official Full Edition](https://www.goldenaiquant.cn/), or connect your own services in your deployment.
 
 ## 🚀 Quick start
 
@@ -120,23 +119,14 @@ commission = max(trade amount × fee rate, minimum fee)
 
 The UI accepts a rate in ten-thousandths: entering `1` means 1 bp (`0.01%`). The default A-share rate is 1 bp with a minimum fee of 5 CNY; operators may switch to pure actual-rate billing.
 
-## 🎬 Demo mode and onboarding
-
-These are independent settings, both enabled by default, and can be toggled separately by a system administrator:
-
-- **Demo mode**: designate a test account and show a demo notice; use read-only or paper-trading permissions.
-- **Onboarding**: show a step-by-step animation on first login, with previous, next, skip, finish, and step navigation controls.
-
-In demo mode, identical AI requests are served from the demo account's browser-local cache before another model call. The cache is not uploaded to the platform server.
-
 ## 🔒 Community scope
 
 | Included | Not bundled |
 | --- | --- |
 | Quotes, search, screening, factors, strategies, backtests, paper trading | Official AI market insights |
-| Mock/CSV/custom providers | Smart research, AI analysts, and third-party web-research orchestration |
+| Mock/CSV/custom providers, single AI analyst | Smart research, multi-analyst collaboration, and third-party web-research orchestration |
 | User-defined risk rules and AI interfaces | Official AI risk assessment, dynamic weights, and recommendation logic |
-| Demo mode and onboarding | Licensed-data aggregation, restricted datasets, and private production gateways |
+| Single AI analyst (one analyst, one round) | Multi-analyst collaboration, multi-agent orchestration, and smart research |
 
 The community edition contains no project brand icons, logos, or branded assets. Operators may replace the name, icons, and theme with their own.
 

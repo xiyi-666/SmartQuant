@@ -25,6 +25,9 @@ import QuotePage from "./pages/QuotePage";
 import ReplicaPage from "./pages/ReplicaPage";
 import RevenuePage from "./pages/RevenuePage";
 import RiskPage from "./pages/RiskPage";
+import AiInsightsPage from "./pages/AiInsightsPage";
+import SmartResearchPage from "./pages/SmartResearchPage";
+import AgentAnalysisPage from "./pages/AgentAnalysisPage";
 import ScreenerPage from "./pages/ScreenerPage";
 import SettingsPage from "./pages/SettingsPage";
 import StrategyPage from "./pages/StrategyPage";
@@ -212,6 +215,9 @@ export default function App() {
           <Route path="/factor-mining" element={<RequirePermission permission={ROUTE_PERMISSIONS["/factor-mining"]}><FactorMiningPage /></RequirePermission>} />
           <Route path="/backtesting" element={<RequirePermission permission={ROUTE_PERMISSIONS["/backtesting"]}><BacktestingPage /></RequirePermission>} />
           <Route path="/risk" element={<RequirePermission permission={ROUTE_PERMISSIONS["/risk"]}><RiskPage /></RequirePermission>} />
+          <Route path="/ai-insights" element={<RequirePermission permission={ROUTE_PERMISSIONS["/ai-insights"]}><AiInsightsPage /></RequirePermission>} />
+          <Route path="/smart-research" element={<RequirePermission permission={ROUTE_PERMISSIONS["/smart-research"]}><SmartResearchPage /></RequirePermission>} />
+          <Route path="/agent-analysis" element={<RequirePermission permission={ROUTE_PERMISSIONS["/agent-analysis"]}><AgentAnalysisPage /></RequirePermission>} />
           <Route path="/trading" element={<RequirePermission permission={ROUTE_PERMISSIONS["/trading"]}><TradingPage /></RequirePermission>} />
           {!COMMUNITY_EDITION && <Route path="/revenue" element={<RequirePermission permission={ROUTE_PERMISSIONS["/revenue"]}><RevenuePage /></RequirePermission>} />}
           {!COMMUNITY_EDITION && <Route path="/analytics" element={<RequirePermission permission={ROUTE_PERMISSIONS["/analytics"]}><AnalyticsPage /></RequirePermission>} />}
