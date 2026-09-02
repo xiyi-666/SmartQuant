@@ -1,0 +1,38 @@
+{
+  "name": "quartsys-fronted-react",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 15474",
+    "smoke:login-dashboard": "node tests/smoke/login-dashboard.cjs",
+    "smoke:auth-brand-admin-nav": "node tests/smoke/auth-brand-admin-nav.cjs",
+    "smoke:search-intraday": "node tests/smoke/search-intraday.cjs",
+    "regression:six-pages": "node tests/regression/six-pages-gate.cjs",
+    "regression:page-cache-ads": "node tests/regression/page-cache-reward-ads.cjs",
+    "audit:mobile": "node tests/responsive/mobile-audit.mjs",
+    "test:landing-motion": "node tests/responsive/landing-canvas-motion.mjs"
+  },
+  "dependencies": {
+    "@codemirror/lang-python": "^6.2.1",
+    "@tanstack/react-query": "^5.66.0",
+    "@uiw/react-codemirror": "^4.25.9",
+    "dompurify": "^3.3.3",
+    "echarts": "^5.6.0",
+    "klinecharts": "^9.8.12",
+    "lucide-react": "^0.474.0",
+    "marked": "^18.0.0",
+    "opencc-js": "^1.0.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^6.30.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@vitejs/plugin-react": "^4.5.2",
+    "vite": "^7.0.0"
+  }
+}

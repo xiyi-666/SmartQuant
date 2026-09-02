@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh" translate="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="google" content="notranslate" />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem("quartsys_lang");
+          var lang = saved === "en" ? "en" : (saved === "zh-TW" || saved === "zh-Hant" ? "zh-TW" : "zh");
+          var prefs = JSON.parse(localStorage.getItem("quartsys_prefs") || "{}");
+          var theme = prefs && prefs.theme === "dark" ? "dark" : "light";
+          var savedMarket = localStorage.getItem("quartsys_market") || (prefs && prefs.defaultMarket) || "CN";
+          var market = /^(HK|港股)$/i.test(savedMarket)
+            ? "HK"
+            : /^(US|美股)$/i.test(savedMarket)
+              ? "US"
+              : "CN";
+          document.documentElement.lang = lang === "en" ? "en" : (lang === "zh-TW" ? "zh-Hant" : "zh-CN");
+          document.documentElement.setAttribute("data-lang", lang);
+          document.documentElement.setAttribute("data-theme", theme);
+          document.documentElement.setAttribute("data-market", market.toLowerCase());
+          document.documentElement.classList.toggle("dark", theme === "dark");
+          window.__QUARTSYS_INITIAL_LANG__ = lang;
+          window.__QUARTSYS_INITIAL_THEME__ = theme;
+          window.__QUARTSYS_INITIAL_MARKET__ = market;
+        } catch (_) {
+          document.documentElement.lang = "zh-CN";
+          document.documentElement.setAttribute("data-lang", "zh");
+          document.documentElement.setAttribute("data-theme", "light");
+          document.documentElement.setAttribute("data-market", "cn");
+          document.documentElement.classList.remove("dark");
+          window.__QUARTSYS_INITIAL_LANG__ = "zh";
+          window.__QUARTSYS_INITIAL_THEME__ = "light";
+          window.__QUARTSYS_INITIAL_MARKET__ = "CN";
+        }
+      })();
+    </script>
+    <title>AIQuartSmart Community Edition | 自部署量化研究与模拟交易平台</title>
+    <script>
+      (function () {
+        if (window.__QUARTSYS_INITIAL_LANG__ === "zh-TW") {
+          document.title = "AIQuartSmart Community Edition | 自託管量化研究與模擬交易平台";
+        } else if (window.__QUARTSYS_INITIAL_LANG__ === "en") {
+          document.title = "AIQuartSmart Community Edition | Self-Hosted Quant Research & Paper Trading";
+        }
+      })();
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    />
+    <script>
+      (function () {
+        if (!("fonts" in document)) {
+          document.documentElement.classList.add("qs-material-icons-ready");
+          return;
+        }
+        document.fonts
+          .load('24px "Material Symbols Outlined"')
+          .then(function () {
+            document.documentElement.classList.add("qs-material-icons-ready");
+          })
+          .catch(function () {});
+      })();
+    </script>
+  </head>
+  <body class="notranslate" translate="no">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

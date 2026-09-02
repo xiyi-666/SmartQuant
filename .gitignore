@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+
+# Build output
+dist/
+.vite/
+
+# IDE / AI agent configs
+.ccw/
+.claude/
+.codex/
+.cursor/
+.gemini/
+.kiro/
+.opencode/
+.qwen/
+.serena/
+.spec-workflow/
+.workflow/
+.zed/
+
+# Local auxiliary repositories and runtime output
+TradingAgents/
+*.pid
+quartsys-backend/generated/
+
+# Database files
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Old/deprecated
+old/
+
+# System temp
+swtich参考/
+.venv/
+__pycache__/
+*.pyc
+*.db
+nul
+*.log

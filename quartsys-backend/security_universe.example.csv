@@ -1,0 +1,4 @@
+code,name,industry,area,board,asset_type
+hk00700,示例证券,香港互联网,香港,港股,stock
+usAAPL,Example Security,Consumer Electronics,United States,US Stock,stock
+510300,示例 ETF,指数基金,中国,ETF,etf
