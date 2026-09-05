@@ -1,6 +1,6 @@
 <div align="center">
 
-# AIQuartSmart Community Edition
+# QaurtSmart
 
 An open, self-hosted platform for quantitative research and paper trading
 
@@ -10,7 +10,7 @@ An open, self-hosted platform for quantitative research and paper trading
 
 ---
 
-AIQuartSmart Community Edition covers the fundamentals from market-data access to strategy validation. It provides the common API, calculations, and UI; operators choose and configure their own data sources, AI services, and risk logic.
+QaurtSmart covers the fundamentals from market-data access to strategy validation. It provides the common API, calculations, and UI; operators choose and configure their own data sources, AI services, and risk logic.
 
 ## ✨ Features
 

@@ -216,7 +216,7 @@ export default function AppShell() {
   const { t, languageMode, setLanguageMode, lang } = useLanguage();
   const { market, setMarket, definition } = useMarket();
   const { theme, toggleTheme } = useTheme();
-  const brandName = lang === "zh" ? "AIQuartSmart Community Edition" : "AIQuartSmart Community Edition";
+  const brandName = lang === "zh" ? "QaurtSmart" : "QaurtSmart";
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [now, setNow] = useState(() => new Date());
@@ -250,12 +250,15 @@ export default function AppShell() {
 
   useEffect(() => {
     let cancelled = false;
+    if (COMMUNITY_EDITION) {
+      localStorage.removeItem("quartsys_demo_mode_active");
+    }
     api.getPublicSiteSettings().then((settings: any) => {
       if (cancelled) return;
       const user = getAuthUser();
       const configuredDemoUser = String(settings?.demo_username || "").trim().toLowerCase();
       const currentUser = String(user?.username || "").trim().toLowerCase();
-      const activeDemo = Boolean(settings?.demo_mode_enabled) && (!configuredDemoUser || configuredDemoUser === currentUser);
+      const activeDemo = !COMMUNITY_EDITION && Boolean(settings?.demo_mode_enabled) && (!configuredDemoUser || configuredDemoUser === currentUser);
       setDemoMode(activeDemo);
       if (activeDemo) localStorage.setItem("quartsys_demo_mode_active", "1");
       else localStorage.removeItem("quartsys_demo_mode_active");
@@ -423,7 +426,7 @@ export default function AppShell() {
     <div
       className={`qs-shell-root ${sidebarCollapsed ? "qs-shell-collapsed" : ""}`}
     >
-      {demoMode && <div className="qs-demo-banner">{lang === "zh" ? "演示模式：当前账号用于功能演示，数据和交易均为模拟结果。" : "Demo mode: this account is for feature demonstrations; data and trades are simulated."}</div>}
+      {!COMMUNITY_EDITION && demoMode && <div className="qs-demo-banner">{lang === "zh" ? "演示模式：当前账号用于功能演示，数据和交易均为模拟结果。" : "Demo mode: this account is for feature demonstrations; data and trades are simulated."}</div>}
       {onboardingVisible && <div className="qs-onboarding-mask" role="dialog" aria-modal="true"><div className="qs-onboarding-card qs-onboarding-animated"><div className="qs-onboarding-head"><span>{lang === "zh" ? "新手引导" : "Getting started"}</span><button type="button" onClick={closeOnboarding} aria-label={lang === "zh" ? "跳过引导" : "Skip onboarding"}><X size={17} /></button></div><div className="qs-onboarding-progress"><span style={{ width: `${((onboardingStep + 1) / onboardingSteps.length) * 100}%` }} /></div><div className="qs-onboarding-step-icon">{onboardingSteps[onboardingStep].icon}</div><div className="qs-onboarding-step-content" key={onboardingStep}><h2>{onboardingSteps[onboardingStep].title}</h2><p>{onboardingSteps[onboardingStep].text}</p></div><div className="qs-onboarding-step-dots">{onboardingSteps.map((_, index) => <button key={index} type="button" className={index === onboardingStep ? "active" : ""} onClick={() => setOnboardingStep(index)} aria-label={`${index + 1}`} />)}</div><div className="qs-onboarding-actions"><button className="figma-btn" type="button" onClick={closeOnboarding}>{lang === "zh" ? "跳过" : "Skip"}</button><div><button className="figma-btn" type="button" disabled={onboardingStep === 0} onClick={() => setOnboardingStep((step) => Math.max(0, step - 1))}>{lang === "zh" ? "上一步" : "Back"}</button><button className="figma-btn figma-btn-primary" type="button" onClick={() => onboardingStep >= onboardingSteps.length - 1 ? closeOnboarding() : setOnboardingStep((step) => step + 1)}>{onboardingStep >= onboardingSteps.length - 1 ? (lang === "zh" ? "完成" : "Finish") : (lang === "zh" ? "下一步" : "Next")}</button></div></div></div></div>}
       {/* ── Sidebar ── */}
       <aside
@@ -616,8 +619,8 @@ export default function AppShell() {
             <button
               className="qs-topbar-icon"
               type="button"
-              title={lang === "zh" ? "使用文档" : "User guide"}
-              aria-label={lang === "zh" ? "使用文档" : "User guide"}
+              title={lang === "zh" ? "参考文档" : "Reference docs"}
+              aria-label={lang === "zh" ? "参考文档" : "Reference docs"}
               onClick={() => navigate("/help")}
               style={{
                 background: "none",

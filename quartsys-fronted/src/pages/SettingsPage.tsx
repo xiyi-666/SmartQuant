@@ -24,6 +24,7 @@ import {
   type AiModuleKey,
   type AiModuleModels,
 } from "../shared/aiModels";
+import { DEFAULT_AI_MODEL } from "../shared/aiDefaults";
 import { useLanguage, useLangText } from "../shared/language";
 import {
   MARKET_DEFINITIONS,
@@ -281,6 +282,11 @@ const AI_MODULE_CONFIGS: {
   { key: "risk", title: "风险监控", titleEn: "Risk Monitor", desc: "AI风险评估与解释", descEn: "AI-assisted risk assessment and explanation", costKey: "risk_ai_assessment" },
 ];
 
+const COMMUNITY_HIDDEN_AI_MODULES = new Set<AiModuleKey>([
+  "ai_insights",
+  "smart_research",
+]);
+
 type AiModuleProviders = Partial<Record<AiModuleKey, string>>;
 type ModelTierKey = "smart" | "advanced" | "ultra";
 type ModelTierConfig = {
@@ -301,7 +307,7 @@ const MODEL_TIER_DEFAULTS: Record<ModelTierKey, ModelTierConfig> = {
     label: "智能",
     label_en: "Smart",
     provider: "openai",
-    model: "gpt-5.5",
+    model: DEFAULT_AI_MODEL,
     multiplier: "1",
     min_role: "normal",
     enabled: true,
@@ -311,7 +317,7 @@ const MODEL_TIER_DEFAULTS: Record<ModelTierKey, ModelTierConfig> = {
     label: "高级",
     label_en: "Advanced",
     provider: "openai",
-    model: "gpt-5.5",
+    model: DEFAULT_AI_MODEL,
     multiplier: "1.25",
     min_role: "vip",
     enabled: true,
@@ -321,7 +327,7 @@ const MODEL_TIER_DEFAULTS: Record<ModelTierKey, ModelTierConfig> = {
     label: "超强",
     label_en: "Ultra",
     provider: "openai",
-    model: "gpt-5.5",
+    model: DEFAULT_AI_MODEL,
     multiplier: "1.75",
     min_role: "vip",
     enabled: true,
@@ -444,7 +450,7 @@ function normalizeModuleModels(raw: any, fallback: string): AiModuleModels {
       rawValue && typeof rawValue === "object"
         ? rawValue.model
         : rawValue;
-    acc[item.key] = String(model || fallback || "gpt-5.5").trim();
+    acc[item.key] = String(model || fallback || DEFAULT_AI_MODEL).trim();
     return acc;
   }, {});
 }
@@ -563,7 +569,7 @@ function buildModuleModelConfigs(
     (acc, item) => {
       acc[item.key] = {
         provider: String(moduleProviders[item.key] || fallbackProvider || "openai"),
-        model: String(moduleModels[item.key] || fallbackModel || "gpt-5.5"),
+        model: String(moduleModels[item.key] || fallbackModel || DEFAULT_AI_MODEL),
       };
       return acc;
     },
@@ -581,6 +587,20 @@ function mergeModelOptions(models: string[], ...extra: Array<string | undefined>
     result.push(value);
   });
   return result;
+}
+
+function modelOptionsForDisplay(value: any) {
+  if (!COMMUNITY_EDITION) return value;
+  const payload = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const defaultModel = String(payload.default_model || DEFAULT_AI_MODEL);
+  return {
+    default_model: defaultModel,
+    models: mergeModelOptions(Array.isArray(payload.models) ? payload.models : [], defaultModel),
+    module_models: payload.module_models && typeof payload.module_models === "object"
+      ? payload.module_models
+      : {},
+    notes: String(payload.notes || "管理员维护可供各 AI 模块选择的模型列表。"),
+  };
 }
 
 /* ── Profile Section ──────────────────────────────────────────────────────── */
@@ -1357,7 +1377,7 @@ function AIConfigSection() {
   const isSystemAdmin = normalizedRole(authUser?.role) === "admin";
   const [cfg, setCfg] = useState({
     provider: "openai",
-    model: "gpt-5.5",
+    model: DEFAULT_AI_MODEL,
     api_key: "",
     base_url: "https://api.openai.com/v1",
   });
@@ -1366,13 +1386,13 @@ function AIConfigSection() {
   const [modelLoading, setModelLoading] = useState(false);
   const [modelOptions, setModelOptions] = useState<string[]>([]);
   const [moduleModels, setModuleModels] = useState<AiModuleModels>(() =>
-    normalizeModuleModels({}, "gpt-5.5"),
+    normalizeModuleModels({}, DEFAULT_AI_MODEL),
   );
   const [moduleProviders, setModuleProviders] = useState<AiModuleProviders>(() =>
     normalizeModuleProviders({}, "openai"),
   );
   const [modelTiers, setModelTiers] = useState<ModelTierConfig[]>(() =>
-    normalizeModelTiers({}, "openai", "gpt-5.5"),
+    normalizeModelTiers({}, "openai", DEFAULT_AI_MODEL),
   );
   const [moduleModelTiers, setModuleModelTiers] = useState<Partial<Record<AiModuleKey, ModelTierKey>>>(() =>
     normalizeModuleModelTiers({}),
@@ -1543,7 +1563,7 @@ function AIConfigSection() {
       .then((d: any) => {
         setKeyConfigured(Boolean(d.api_key_configured || d.api_key));
         setKeySource(d.api_key_source || "");
-        const defaultModel = d.model || "gpt-5.5";
+        const defaultModel = d.model || DEFAULT_AI_MODEL;
         const defaultProvider = d.provider || "openai";
         const moduleConfigSource = d.module_model_configs || d.module_models;
         const configuredModels = Array.isArray(d.models)
@@ -1575,7 +1595,7 @@ function AIConfigSection() {
           base_url: d.base_url || "https://api.openai.com/v1",
         });
         setModelOptions(configuredModels);
-        setModelOptionsText(JSON.stringify(modelOptionsPayload, null, 2));
+        setModelOptionsText(JSON.stringify(modelOptionsForDisplay(modelOptionsPayload), null, 2));
         setModuleModels(nextModuleModels);
         setModuleProviders(nextModuleProviders);
         setModelTiers(nextModelTiers);
@@ -1583,30 +1603,30 @@ function AIConfigSection() {
         saveAiModelState(
           configuredModels,
           defaultModel,
-          nextModuleModelTiers as AiModuleModels,
+          (COMMUNITY_EDITION ? nextModuleModels : nextModuleModelTiers) as AiModuleModels,
           modelOptionsPayload.tier_options || tierOptionsFromModelTiers(nextModelTiers),
         );
       })
       .catch(() => {
         api.getLLMModelOptions().then((d: any) => {
-          const models = Array.isArray(d?.models) ? d.models : ["gpt-5.5"];
-          const defaultModel = d?.default_model || models[0] || "gpt-5.5";
+          const models = Array.isArray(d?.models) ? d.models : [DEFAULT_AI_MODEL];
+          const defaultModel = d?.default_model || models[0] || DEFAULT_AI_MODEL;
           const nextModuleModels = normalizeModuleModels(d?.module_models, defaultModel);
           const nextModelTiers = normalizeModelTiers(d?.model_tiers || d?.tier_options, "openai", defaultModel);
           const nextModuleModelTiers = normalizeModuleModelTiers(d?.module_model_tiers || d?.module_models);
           setModelOptions(models);
-          setModelOptionsText(JSON.stringify(d || {
+          setModelOptionsText(JSON.stringify(modelOptionsForDisplay(d || {
             default_model: defaultModel,
             models,
             module_models: nextModuleModels,
-          }, null, 2));
+          }), null, 2));
           setModuleModels(nextModuleModels);
           setModelTiers(nextModelTiers);
           setModuleModelTiers(nextModuleModelTiers);
           saveAiModelState(
             models,
             defaultModel,
-            nextModuleModelTiers as AiModuleModels,
+            (COMMUNITY_EDITION ? nextModuleModels : nextModuleModelTiers) as AiModuleModels,
             d?.tier_options || tierOptionsFromModelTiers(nextModelTiers),
           );
         }).catch(() => {});
@@ -1640,19 +1660,21 @@ function AIConfigSection() {
       .catch((error: any) => {
         setResearchToolsMsg(error?.message || "投研工具配置加载失败");
       });
-    api
-      .getAdminAlphaRecommendationSettings()
-      .then((payload: any) => {
-        setRecommendationSettings(normalizeRecommendationSettings(payload));
-      })
-      .catch((error: any) => {
-        setRecommendationMsg(error?.message || lt("AI 观察池配置加载失败", "Failed to load observation pool settings"));
-      });
+    if (!COMMUNITY_EDITION) {
+      api
+        .getAdminAlphaRecommendationSettings()
+        .then((payload: any) => {
+          setRecommendationSettings(normalizeRecommendationSettings(payload));
+        })
+        .catch((error: any) => {
+          setRecommendationMsg(error?.message || lt("AI 观察池配置加载失败", "Failed to load observation pool settings"));
+        });
+    }
   }, [isSystemAdmin]);
 
   const save = async () => {
     try {
-      const normalizedModules = normalizeModuleModels(moduleModels, cfg.model || "gpt-5.5");
+      const normalizedModules = normalizeModuleModels(moduleModels, cfg.model || DEFAULT_AI_MODEL);
       const normalizedTierModules = normalizeModuleModelTiers(moduleModelTiers);
       const tierOptions = tierOptionsFromModelTiers(modelTiers);
       if (!isSystemAdmin) {
@@ -1685,11 +1707,15 @@ function AIConfigSection() {
       );
       modelOptionsPayload = {
         ...modelOptionsPayload,
-        default_model: modelOptionsPayload.default_model || cfg.model || mergedModels[0] || "gpt-5.5",
+        default_model: modelOptionsPayload.default_model || cfg.model || mergedModels[0] || DEFAULT_AI_MODEL,
         models: mergedModels,
         module_models: normalizedModules,
-        module_model_tiers: normalizedTierModules,
-        model_tiers: modelTiersToRecord(modelTiers),
+        ...(COMMUNITY_EDITION
+          ? {}
+          : {
+              module_model_tiers: normalizedTierModules,
+              model_tiers: modelTiersToRecord(modelTiers),
+            }),
       };
       const r: any = await api.saveLLMConfig({
         ...cfg,
@@ -1697,7 +1723,7 @@ function AIConfigSection() {
           normalizedModules,
           normalizedProviders,
           cfg.provider || "openai",
-          cfg.model || "gpt-5.5",
+          cfg.model || DEFAULT_AI_MODEL,
         ),
       });
       const optionsResult: any = await api.saveLLMModelOptions(modelOptionsPayload);
@@ -1709,29 +1735,33 @@ function AIConfigSection() {
       const nextModelTiers = normalizeModelTiers(
         optionsResult?.model_tiers || modelOptionsPayload.model_tiers,
         cfg.provider || "openai",
-        cfg.model || "gpt-5.5",
+        cfg.model || DEFAULT_AI_MODEL,
       );
       const nextModuleModelTiers = normalizeModuleModelTiers(
         optionsResult?.module_model_tiers || modelOptionsPayload.module_model_tiers,
       );
       setModelOptions(nextModels);
-      setModelOptionsText(JSON.stringify(optionsResult?.models ? {
+      setModelOptionsText(JSON.stringify(modelOptionsForDisplay(optionsResult?.models ? {
         default_model: optionsResult.default_model,
         models: optionsResult.models,
         module_models: optionsResult.module_models,
         module_model_tiers: optionsResult.module_model_tiers,
         model_tiers: optionsResult.model_tiers,
         notes: optionsResult.notes,
-      } : modelOptionsPayload, null, 2));
+      } : modelOptionsPayload), null, 2));
       setModelTiers(nextModelTiers);
       setModuleModelTiers(nextModuleModelTiers);
       saveAiModelState(
         nextModels,
-        cfg.model || "gpt-5.5",
-        nextModuleModelTiers as AiModuleModels,
+        cfg.model || DEFAULT_AI_MODEL,
+        (COMMUNITY_EDITION ? normalizedModules : nextModuleModelTiers) as AiModuleModels,
         tierOptionsFromModelTiers(nextModelTiers),
       );
-      setMsg(lt("保存成功，系统级 AI 服务、模型档位和额度倍率已更新", "Saved. System AI service, model tiers and credit multipliers updated."));
+      setMsg(
+        COMMUNITY_EDITION
+          ? lt("保存成功，AI 服务和模块模型已更新", "Saved. AI service and module models updated.")
+          : lt("保存成功，系统级 AI 服务、模型档位和额度倍率已更新", "Saved. System AI service, model tiers and credit multipliers updated."),
+      );
     } catch (e: any) {
       setMsg(e.message);
     }
@@ -1757,21 +1787,21 @@ function AIConfigSection() {
       const r: any = await api.listLLMModels(cfg);
       const models = Array.isArray(r?.models) ? r.models : [];
       setModelOptions(models);
-      const selectedModel = cfg.model || models[0] || "gpt-5.5";
+      const selectedModel = cfg.model || models[0] || DEFAULT_AI_MODEL;
       const normalizedModules = normalizeModuleModels(moduleModels, selectedModel);
       setModuleModels(normalizedModules);
-      setModelOptionsText(JSON.stringify({
+      setModelOptionsText(JSON.stringify(modelOptionsForDisplay({
         default_model: selectedModel,
         models: mergeModelOptions(models, selectedModel, ...Object.values(normalizedModules)),
         module_models: normalizedModules,
         module_model_tiers: normalizeModuleModelTiers(moduleModelTiers),
         model_tiers: modelTiersToRecord(modelTiers),
         notes: "从当前服务地址 /models 拉取后生成。",
-      }, null, 2));
+      }), null, 2));
       saveAiModelState(
         models,
         selectedModel,
-        normalizeModuleModelTiers(moduleModelTiers) as AiModuleModels,
+        (COMMUNITY_EDITION ? normalizedModules : normalizeModuleModelTiers(moduleModelTiers)) as AiModuleModels,
         tierOptionsFromModelTiers(modelTiers),
       );
       if (!cfg.model && models[0]) setCfg((c) => ({ ...c, model: models[0] }));
@@ -1846,7 +1876,12 @@ function AIConfigSection() {
     }
   };
 
-  const defaultModelOptions = mergeModelOptions(modelOptions, cfg.model || "gpt-5.5");
+  const defaultModelOptions = mergeModelOptions(modelOptions, cfg.model || DEFAULT_AI_MODEL);
+  const directModelOptions = mergeModelOptions(
+    modelOptions,
+    cfg.model || DEFAULT_AI_MODEL,
+    ...Object.values(moduleModels),
+  );
   const selectableTierKeys = (
     isSystemAdmin
       ? MODEL_TIER_KEYS
@@ -1918,7 +1953,7 @@ function AIConfigSection() {
                 <div className="settings-module-model-control">
                   <select
                     className="settings-module-model-select"
-                    value={cfg.model || defaultModelOptions[0] || "gpt-5.5"}
+                    value={cfg.model || defaultModelOptions[0] || DEFAULT_AI_MODEL}
                     onChange={(e) => setCfg((c) => ({ ...c, model: e.target.value }))}
                   >
                     {defaultModelOptions.map((m) => (
@@ -1985,7 +2020,7 @@ function AIConfigSection() {
               {lt("管理员维护平台允许用户选择的模型列表和各模块默认模型。", "Administrators maintain selectable models and module defaults.")}
             </p>
           </div>
-          <div
+          {!COMMUNITY_EDITION && <div
             style={{
               marginTop: 22,
               paddingTop: 18,
@@ -2089,7 +2124,7 @@ function AIConfigSection() {
                         <div className="settings-module-model-control tier-model-select-control">
                           <select
                             className="settings-module-model-select"
-                            value={tier.model || cfg.model || "gpt-5.5"}
+                            value={tier.model || cfg.model || DEFAULT_AI_MODEL}
                             onChange={(event) =>
                               setModelTiers((prev) =>
                                 prev.map((item) =>
@@ -2170,7 +2205,7 @@ function AIConfigSection() {
                 );
               })}
             </div>
-          </div>
+          </div>}
         </>
       ) : (
         <div className="settings-ai-readonly-card">
@@ -2200,9 +2235,12 @@ function AIConfigSection() {
           </p>
         </div>
         <div className="settings-module-model-list">
-          {AI_MODULE_CONFIGS.map((item) => {
+          {AI_MODULE_CONFIGS.filter(
+            (item) => !COMMUNITY_EDITION || !COMMUNITY_HIDDEN_AI_MODULES.has(item.key),
+          ).map((item) => {
             const rawTier = moduleModelTiers[item.key] || "smart";
             const currentTier = visibleTierKeys.includes(rawTier) ? rawTier : visibleTierKeys[0];
+            const currentModel = moduleModels[item.key] || cfg.model || directModelOptions[0] || DEFAULT_AI_MODEL;
             const baseCost = item.costKey ? Number(aiCreditCosts[item.costKey] || 0) : 0;
             return (
               <div key={item.key} className="settings-module-model-card">
@@ -2216,8 +2254,12 @@ function AIConfigSection() {
                   <div className="settings-module-model-cost">
                     {baseCost > 0
                       ? lt(
-                          `基础消耗 ${baseCost} AI 使用额度/次，实际扣除按所选模型档位倍率计算。`,
-                          `Base cost ${baseCost} credits/call. Final charge follows the selected model tier multiplier.`,
+                          COMMUNITY_EDITION
+                            ? `基础消耗 ${baseCost} AI 使用额度/次，实际扣除按当前模型计量。`
+                            : `基础消耗 ${baseCost} AI 使用额度/次，实际扣除按所选模型档位倍率计算。`,
+                          COMMUNITY_EDITION
+                            ? `Base cost ${baseCost} credits/call. Final charge follows the selected model.`
+                            : `Base cost ${baseCost} credits/call. Final charge follows the selected model tier multiplier.`,
                         )
                       : lt(
                           "该模块按套餐额度或对话次数计量，当前不单独扣 AI 使用额度。",
@@ -2229,8 +2271,17 @@ function AIConfigSection() {
                   <div className="settings-module-model-control">
                     <select
                       className="settings-module-model-select"
-                      value={currentTier}
+                      value={COMMUNITY_EDITION ? currentModel : currentTier}
                       onChange={(event) => {
+                        if (COMMUNITY_EDITION) {
+                          const next = {
+                            ...moduleModels,
+                            [item.key]: event.target.value,
+                          };
+                          setModuleModels(next as AiModuleModels);
+                          saveAiModuleModels(next as AiModuleModels, cfg.model || DEFAULT_AI_MODEL);
+                          return;
+                        }
                         const next = {
                           ...moduleModelTiers,
                           [item.key]: event.target.value,
@@ -2239,13 +2290,19 @@ function AIConfigSection() {
                         saveAiModuleModels(next as AiModuleModels, "smart");
                       }}
                     >
-                      {visibleTierKeys.map((tier) => (
-                        <option key={tier} value={tier}>
-                          {baseCost > 0
-                            ? formatModelTierCost(tier, baseCost, lang, modelTiers)
-                            : `${modelTierDisplay(tier, lang, modelTiers)} · ${Number(modelTierMultiplier(tier, modelTiers)).toFixed(modelTierMultiplier(tier, modelTiers) % 1 === 0 ? 0 : 1)}x`}
-                        </option>
-                      ))}
+                      {COMMUNITY_EDITION
+                        ? directModelOptions.map((model) => (
+                            <option key={model} value={model}>
+                              {model}
+                            </option>
+                          ))
+                        : visibleTierKeys.map((tier) => (
+                            <option key={tier} value={tier}>
+                              {baseCost > 0
+                                ? formatModelTierCost(tier, baseCost, lang, modelTiers)
+                                : `${modelTierDisplay(tier, lang, modelTiers)} · ${Number(modelTierMultiplier(tier, modelTiers)).toFixed(modelTierMultiplier(tier, modelTiers) % 1 === 0 ? 0 : 1)}x`}
+                            </option>
+                          ))}
                     </select>
                     <span className="settings-module-model-chevron">⌄</span>
                   </div>
@@ -2255,7 +2312,7 @@ function AIConfigSection() {
           })}
         </div>
       </div>
-      {isSystemAdmin && (
+      {isSystemAdmin && !COMMUNITY_EDITION && (
         <div className="settings-recommendation-config">
           <div className="settings-recommendation-config-header">
             <div>
@@ -2663,7 +2720,7 @@ function AIConfigSection() {
               </div>
             </div>
           </div>
-          <div className="settings-research-market-card">
+          {!COMMUNITY_EDITION && <div className="settings-research-market-card">
             <div className="settings-research-market-header">
               <div>
                 <h3>{lt("智能研究国内数据源", "Smart Research CN Data Sources")}</h3>
@@ -2747,8 +2804,8 @@ function AIConfigSection() {
                 </p>
               </div>
             </div>
-          </div>
-          <div className="settings-research-market-card">
+          </div>}
+          {!COMMUNITY_EDITION && <div className="settings-research-market-card">
             <div className="settings-research-market-header">
               <div>
                 <h3>{lt("TradingAgents 新闻与宏观工具", "TradingAgents News & Macro Tools")}</h3>
@@ -2903,7 +2960,7 @@ function AIConfigSection() {
                 </p>
               </div>
             </div>
-          </div>
+          </div>}
           <div className="settings-field" style={{ marginTop: 14 }}>
             <label>{lt("工具配置 JSON", "Tool Config JSON")}</label>
             <textarea
@@ -3334,7 +3391,7 @@ function AuthSecuritySection() {
             </div>
             <div className="settings-field">
               <label>RP Name</label>
-              <input value={settings?.passkey?.rp_name || ""} onChange={(e) => setPath(["passkey", "rp_name"], e.target.value)} placeholder="AIQuartSmart Community Edition" />
+              <input value={settings?.passkey?.rp_name || ""} onChange={(e) => setPath(["passkey", "rp_name"], e.target.value)} placeholder="QaurtSmart" />
             </div>
           </div>
         </div>
@@ -6637,11 +6694,11 @@ function SiteConfigSection() {
         <p className="settings-site-loading">{lt("正在加载站点设置...", "Loading site settings...")}</p>
       ) : (
         <div className="settings-site-grid">
-          <section className="settings-subcard settings-site-card">
+          {!COMMUNITY_EDITION && <section className="settings-subcard settings-site-card">
             <div className="settings-subcard-header"><div><h3>{lt("演示模式", "Demo Mode")}</h3><p>{lt("用于测试账号和产品演示。建议演示账号只使用模拟交易数据。", "For test accounts and product demonstrations. Use paper-trading data for the demo account.")}</p></div></div>
             <label className="settings-site-link-toggle"><input type="checkbox" checked={settings.demo_mode_enabled} onChange={(event) => patchSetting("demo_mode_enabled", event.target.checked)} /><span>{lt("开启演示模式", "Enable demo mode")}</span></label>
             <label className="settings-field"><span>{lt("演示账号用户名（可选）", "Demo username (optional)")}</span><input value={settings.demo_username} onChange={(event) => patchSetting("demo_username", event.target.value)} placeholder={lt("例如 demo", "e.g. demo")} /></label>
-          </section>
+          </section>}
           <section className="settings-subcard settings-site-card">
             <div className="settings-subcard-header"><div><h3>{lt("新手引导", "Onboarding")}</h3><p>{lt("独立于演示模式控制新用户首次登录时的功能引导。", "Controls first-login guidance independently from demo mode.")}</p></div></div>
             <label className="settings-site-link-toggle"><input type="checkbox" checked={settings.onboarding_enabled} onChange={(event) => patchSetting("onboarding_enabled", event.target.checked)} /><span>{lt("开启新手引导", "Enable onboarding")}</span></label>
@@ -6807,7 +6864,7 @@ function TradingConfigSection() {
       setSaving(false);
     }
   };
-  return <div className="settings-section">
+  return <div className="settings-section settings-trading-config-section">
     <div className="settings-section-header"><div><h2>{lt("模拟交易参数", "Paper Trading Parameters")}</h2><p>{lt("佣金按成交金额乘费率计算；当结果低于最低佣金时按最低佣金收取。", "Commission equals trade amount multiplied by the rate; values below the minimum are charged at the minimum.")}</p></div><button className="figma-btn figma-btn-primary" type="button" onClick={save} disabled={loading || saving}><Save size={15} />{saving ? lt("保存中...", "Saving...") : lt("保存", "Save")}</button></div>
     {loading ? <p>{lt("加载中...", "Loading...")}</p> : <div className="settings-grid-3">{["CN", "HK", "US"].map((market) => <section className="settings-subcard" key={market}><h3>{market}</h3><label className="settings-field"><span>{lt("佣金费率（万分比）", "Fee rate (basis points per 10,000)")}</span><input type="number" min="0" max="1000" step="0.1" value={Number(settings[market]?.fee_rate || 0) * 10000} onChange={(e) => update(market, "fee_rate", e.target.value)} /></label><label className="settings-field"><span>{lt("最低佣金", "Minimum fee")}</span><input type="number" min="0" step="0.01" value={settings[market]?.minimum_fee ?? 0} onChange={(e) => update(market, "minimum_fee", e.target.value)} /></label><small>{lt(`例如填写 1 就是万1（0.01%）；成交额 10000 时佣金为 max(10000 × 0.0001, 最低佣金)。`, `Enter 1 for 1 bp (0.01%); for a 10,000 trade, fee = max(10,000 × 0.0001, minimum fee).`)}</small></section>)}</div>}
     {msg && <p className="settings-site-message" role="status">{msg}</p>}
@@ -9037,7 +9094,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="settings-page">
+    <div className={`settings-page ${COMMUNITY_EDITION ? "community-settings-page" : ""}`}>
       {/* Page Header */}
       <div className="figma-page-header">
         <div>

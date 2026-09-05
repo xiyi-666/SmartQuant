@@ -1270,7 +1270,7 @@ export default function SmartResearchPage() {
       <CommunityFeatureNotice
         title={lt("智能研究", "Smart Research")}
         description={lt("社区版保留模块入口，但不提供平台内置的智能研究与多 Agent 编排。", "The module remains visible, but built-in smart research and multi-agent orchestration are not included in the community edition.")}
-        detail={lt("请在自己的环境中接入数据源和 AI 工作流，按需搭建研究流程。", "Connect your own data sources and AI workflow in your deployment to build the research process you need.")}
+        detail={lt("可在自有环境接入数据源与 AI 工作流，并按需搭建独立的研究流程。", "Data sources and AI workflows can be connected in a self-hosted environment to build an independent research process as needed.")}
       />
     );
   }

@@ -1,3 +1,5 @@
+import { DEFAULT_AI_MODEL } from "./aiDefaults";
+
 export type CustomerServiceFaq = {
   question: string;
   answer: string;
@@ -41,10 +43,10 @@ export type PublicCustomerServiceAiSettings = Pick<
 
 export const DEFAULT_CUSTOMER_SERVICE_AI_CONFIG: CustomerServiceAiConfig = {
   enabled: false,
-  display_title: "AIQuartSmart Community Edition 站点助手",
+  display_title: "QaurtSmart 站点助手",
   use_system_ai: true,
   provider: "openai",
-  model: "gpt-5.5",
+  model: DEFAULT_AI_MODEL,
   api_url: "",
   api_key: "",
   welcome_message: "你好，我可以介绍本地部署、数据源配置和社区版使用流程。",
@@ -54,7 +56,7 @@ export const DEFAULT_CUSTOMER_SERVICE_AI_CONFIG: CustomerServiceAiConfig = {
   knowledge_base: {
     internal: {
       enabled: true,
-      text: "AIQuartSmart Community Edition 是一套自部署量化研究平台，提供行情接入、选股、因子、回测、模拟交易以及用户自定义扩展接口。",
+      text: "QaurtSmart 是一套自部署量化研究平台，提供行情接入、选股、因子、回测、模拟交易以及用户自定义扩展接口。",
     },
     text: { enabled: true, content: "" },
     uploaded_files: [],

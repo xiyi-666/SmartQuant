@@ -1,6 +1,6 @@
 <div align="center">
 
-# AIQuartSmart Community Edition
+# QaurtSmart
 
 面向自部署環境的開源量化研究與模擬交易平台
 
@@ -10,7 +10,7 @@
 
 ---
 
-AIQuartSmart Community Edition 提供從行情接入到策略驗證的基礎能力。平台只負責統一介面、計算與展示；資料源、AI 服務及風控邏輯由部署者自行選擇與配置。
+QaurtSmart 提供從行情接入到策略驗證的基礎能力。平台只負責統一介面、計算與展示；資料源、AI 服務及風控邏輯由部署者自行選擇與配置。
 
 ## ✨ 功能概覽
 

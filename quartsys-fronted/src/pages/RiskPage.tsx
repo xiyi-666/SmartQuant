@@ -482,8 +482,8 @@ export default function RiskPage() {
   );
 
   // ── Data fetching ──
-  const loadRiskData = useCallback(async () => {
-    setLoading(true);
+  const loadRiskData = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) setLoading(true);
     try {
       const daysMap = { "1D": 1, "14D": 14, "30D": 30 };
       const days = daysMap[timeRange];
@@ -517,6 +517,18 @@ export default function RiskPage() {
             : null,
         );
       }
+      // The systemic endpoint persists today's database snapshot. If the two
+      // requests raced on first load, fetch the now-persisted trend once more;
+      // this second read is database-only and returns immediately.
+      if (
+        trendData.status === "fulfilled" &&
+        Array.isArray(trendData.value) &&
+        trendData.value.length === 0 &&
+        systemicData.status === "fulfilled"
+      ) {
+        const refreshedTrend = await api.getRiskTrend(days, market).catch(() => null);
+        if (Array.isArray(refreshedTrend)) setTrend(refreshedTrend);
+      }
     } finally {
       setLoading(false);
       setCacheHydratedScope(`${market}:${timeRange}`);
@@ -538,6 +550,9 @@ export default function RiskPage() {
       setFundFlow(cached.value.fundFlow || null);
       setLoading(false);
       setCacheHydratedScope(riskCacheScope);
+      // Local storage is only a paint-first fallback. Always refresh from the
+      // server so the chart reflects today's persisted database snapshot.
+      if (sectorSettingsMarket === market) void loadRiskData({ silent: true });
       return;
     }
     if (sectorSettingsMarket !== market) return;

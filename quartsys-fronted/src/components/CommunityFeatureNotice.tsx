@@ -12,20 +12,21 @@ export default function CommunityFeatureNotice({
 }) {
   const lt = useLangText();
   return (
-    <div className="figma-page-header" style={{ maxWidth: 760 }}>
-      <div style={{ display: "grid", gap: 14 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--primary)" }}>
-          <LockKeyhole size={22} aria-hidden="true" />
-          <h1 style={{ margin: 0 }}>{title}</h1>
+    <section className="community-feature-notice" aria-labelledby="community-feature-notice-title">
+      <div className="community-feature-notice-card">
+        <div className="community-feature-notice-icon" aria-hidden="true">
+          <LockKeyhole size={24} />
         </div>
-        <p style={{ margin: 0 }}>{description}</p>
-        <div style={{ padding: 16, borderRadius: 12, background: "var(--bg-gray)", border: "1px solid var(--border-subtle)", lineHeight: 1.7 }}>
-          {detail}
+        <div className="community-feature-notice-copy">
+          <p className="community-feature-notice-eyebrow">{lt("社区版功能说明", "Community edition")}</p>
+          <h1 id="community-feature-notice-title">{title}</h1>
+          <p className="community-feature-notice-description">{description}</p>
+          <div className="community-feature-notice-detail">{detail}</div>
+          <a className="figma-btn community-feature-notice-action" href="https://www.goldenaiquant.cn/" target="_blank" rel="noreferrer">
+            {lt("了解完整功能", "View the full product")} <ExternalLink size={14} aria-hidden="true" />
+          </a>
         </div>
-        <a className="figma-btn" href="https://www.goldenaiquant.cn/" target="_blank" rel="noreferrer" style={{ width: "fit-content" }}>
-          {lt("了解完整功能", "View the full product")} <ExternalLink size={14} />
-        </a>
       </div>
-    </div>
+    </section>
   );
 }

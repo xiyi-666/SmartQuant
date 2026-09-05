@@ -364,7 +364,7 @@ class LLMConfig(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     provider = Column(String, default="openai")  # openai/anthropic/google/custom
-    model = Column(String, default="gpt-4o-mini")
+    model = Column(String, default="deepseek-v4-flash")
     api_key = Column(String, nullable=True)
     base_url = Column(String, nullable=True)  # custom provider only
     module_models_json = Column(Text, nullable=True)

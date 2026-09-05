@@ -22,11 +22,11 @@ const DOCS: Record<
         headingZh: "服务定位",
         headingEn: "Service Scope",
         bodyZh: [
-          "AIQuartSmart Community Edition提供行情数据整理、因子研究、策略回测、AI 分析、智能研究和模拟交易等软件工具能力。",
+          "QaurtSmart提供行情数据整理、因子研究、策略回测、AI 分析、智能研究和模拟交易等软件工具能力。",
           "平台内容仅用于研究参考，不构成证券投资咨询、投资顾问服务、交易指令或收益承诺。",
         ],
         bodyEn: [
-          "AIQuartSmart Community Edition provides software tools for market data, factor research, backtesting, AI analysis, smart research and simulated trading.",
+          "QaurtSmart provides software tools for market data, factor research, backtesting, AI analysis, smart research and simulated trading.",
           "Platform content is for research reference only and is not securities investment consulting, advisory service, trading instruction or a return promise.",
         ],
       },
@@ -169,7 +169,7 @@ export default function LegalPage() {
             <span>{lt("返回", "Back")}</span>
           </button>
           <Link to="/" className="legal-brand" aria-label={lt("返回主页", "Back to home")}>
-            <span>{lt("AIQuartSmart Community Edition", "AIQuartSmart Community Edition")}</span>
+            <span>{lt("QaurtSmart", "QaurtSmart")}</span>
           </Link>
         </div>
         <Link to="/login" className="legal-login-link">

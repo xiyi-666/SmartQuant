@@ -20,8 +20,8 @@ type LanguageContextValue = {
 
 const TEXT: Record<Lang, Record<string, string>> = {
   zh: {
-    brandName: "AIQuartSmart Community Edition",
-    documentTitle: "AIQuartSmart Community Edition | 自部署量化研究与模拟交易平台",
+    brandName: "QaurtSmart",
+    documentTitle: "QaurtSmart | 自部署量化研究与模拟交易平台",
     marketOpen: "市场：开盘",
     dashboard: "行情数据",
     aiInsights: "AI 洞察",
@@ -131,8 +131,8 @@ const TEXT: Record<Lang, Record<string, string>> = {
     booleanType: "布尔型",
   },
   en: {
-    brandName: "AIQuartSmart Community Edition",
-    documentTitle: "AIQuartSmart Community Edition | AI-Powered Investment Research & Quant Decision Platform",
+    brandName: "QaurtSmart",
+    documentTitle: "QaurtSmart | Self-hosted Quant Research Platform",
     marketOpen: "Market: OPEN",
     dashboard: "Market Data",
     aiInsights: "AI Insights",

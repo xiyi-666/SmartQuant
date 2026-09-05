@@ -77,12 +77,12 @@ export function createEmptyHomepageAdBlock(name = ""): PublicHomepageAdBlock {
 }
 
 export const DEFAULT_PUBLIC_SITE_SETTINGS: PublicSiteSettings = {
-  brand_zh: "AIQuartSmart Community Edition",
-  brand_en: "AIQuartSmart Community Edition",
+  brand_zh: "QaurtSmart",
+  brand_en: "QaurtSmart",
   about_zh:
-    "AIQuartSmart Community Edition 是一套面向个人投资者与研究者的自部署量化研究平台。它将用户配置的市场数据、因子研究、策略回测、模拟交易和风险规则连接为可复现的研究流程。",
+    "QaurtSmart 是一套面向个人投资者与研究者的自部署量化研究平台。它将用户配置的市场数据、因子研究、策略回测、模拟交易和风险规则连接为可复现的研究流程。",
   about_en:
-    "AIQuartSmart Community Edition is a self-hosted quantitative research platform for individual investors and researchers. It connects operator-configured market data, factor research, strategy backtesting, paper trading and risk rules into a reproducible workflow.",
+    "QaurtSmart is a self-hosted quantitative research platform for individual investors and researchers. It connects operator-configured market data, factor research, strategy backtesting, paper trading and risk rules into a reproducible workflow.",
   contact: { qq: "1049674092", wechat: "W1049674092", telegram: "", whatsapp: "" },
   footer_links: [
     { key: "capabilities", label_zh: "产品能力", label_en: "Capabilities", href: "#capabilities", enabled: true },
@@ -99,8 +99,8 @@ export const DEFAULT_PUBLIC_SITE_SETTINGS: PublicSiteSettings = {
       createEmptyHomepageAdBlock(`赞助商 ${index + 1}`),
     ),
   },
-  copyright_zh: "© 2026 AIQuartSmart Community Edition 开源量化研究平台",
-  copyright_en: "© 2026 AIQuartSmart Community Edition Open Quant Research",
+  copyright_zh: "© 2026 QaurtSmart 开源量化研究平台",
+  copyright_en: "© 2026 QaurtSmart Open Quant Research",
   demo_mode_enabled: true,
   onboarding_enabled: true,
   demo_username: "",

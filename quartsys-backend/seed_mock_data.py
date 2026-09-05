@@ -242,7 +242,7 @@ def init_mock_data():
                 db.add(Strategy(name=name, code=f"# {name}\n"))
         # LLM配置
         if not db.query(LLMConfig).first():
-            db.add(LLMConfig(provider="openai", model="gpt-4o-mini", api_key="", base_url=""))
+            db.add(LLMConfig(provider="openai", model="deepseek-v4-flash", api_key="", base_url=""))
         # 策略参数
         if not db.query(StrategyParams).filter(StrategyParams.id == 1).first():
             db.add(StrategyParams(

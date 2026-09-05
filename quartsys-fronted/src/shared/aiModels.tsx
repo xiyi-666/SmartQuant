@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { api } from "../api";
 import { getAuthUser } from "./auth";
+import { DEFAULT_AI_MODEL } from "./aiDefaults";
 import { useLanguage } from "./language";
 
 const MODELS_KEY = "quartsys_llm_models";
@@ -8,7 +9,7 @@ const DEFAULT_MODEL_KEY = "quartsys_default_ai_model";
 const MODULE_MODELS_KEY = "quartsys_ai_module_models";
 const TIER_OPTIONS_KEY = "quartsys_ai_model_tier_options";
 const MODEL_EVENT = "quartsys:ai-models-updated";
-const DEFAULT_MODEL = "gpt-5.5";
+const DEFAULT_MODEL = DEFAULT_AI_MODEL;
 const MODULE_KEYS = [
   "ai_insights",
   "factor_generation",

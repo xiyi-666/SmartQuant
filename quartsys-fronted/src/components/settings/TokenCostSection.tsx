@@ -1074,7 +1074,7 @@ export default function TokenCostSection() {
                         className="figma-input"
                         list="token-cost-known-models"
                         value={row.model}
-                        placeholder="gpt-5.5 / *"
+                        placeholder="deepseek-v4-flash / *"
                         onChange={(event) => patchPricingRow(index, { model: event.target.value })}
                       />
                     </td>

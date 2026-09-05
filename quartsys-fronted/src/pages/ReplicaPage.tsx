@@ -9,7 +9,7 @@ type Props = {
 
 function parseHtml(rawHtml: string) {
   const doc = new DOMParser().parseFromString(rawHtml, "text/html");
-  const title = doc.title || "AIQuartSmart Community Edition";
+  const title = doc.title || "QaurtSmart";
   const styleTexts = Array.from(doc.querySelectorAll("head style"))
     .map((s) => s.textContent || "")
     .filter(Boolean);
@@ -37,7 +37,7 @@ function removeLegacyFloatingAssistants(html: string) {
 function localizeLegacyTitle(title: string, lang: "zh" | "en") {
   if (lang === "zh") return title;
   return title
-    .replace(/AIQuartSmart Community Edition/g, "AIQuartSmart Community Edition")
+    .replace(/QaurtSmart/g, "QaurtSmart")
     .replace(/量化交易系统/g, "Quant Trading System");
 }
 

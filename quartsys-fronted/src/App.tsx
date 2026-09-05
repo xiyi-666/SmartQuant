@@ -16,14 +16,11 @@ import FactorMiningPage from "./pages/FactorMiningPage";
 import HelpPage from "./pages/HelpPage";
 import BacktestingPage from "./pages/BacktestingPage";
 import DashboardPage from "./pages/DashboardPage";
-import EpayCheckoutPage from "./pages/EpayCheckoutPage";
 import LoginPage from "./pages/LoginPage";
 import LandingPage from "./pages/LandingPage";
 import LegalPage from "./pages/LegalPage";
-import AnalyticsPage from "./pages/AnalyticsPage";
 import QuotePage from "./pages/QuotePage";
 import ReplicaPage from "./pages/ReplicaPage";
-import RevenuePage from "./pages/RevenuePage";
 import RiskPage from "./pages/RiskPage";
 import AiInsightsPage from "./pages/AiInsightsPage";
 import SmartResearchPage from "./pages/SmartResearchPage";
@@ -32,9 +29,7 @@ import ScreenerPage from "./pages/ScreenerPage";
 import SettingsPage from "./pages/SettingsPage";
 import StrategyPage from "./pages/StrategyPage";
 import TradingPage from "./pages/TradingPage";
-import TokenCostPage from "./pages/TokenCostPage";
 import { useLanguage } from "./shared/language";
-import { COMMUNITY_EDITION } from "./shared/edition";
 
 function RootRedirect() {
   return <Navigate to="/" replace />;
@@ -207,7 +202,6 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<Navigate to="/login?mode=register" replace />} />
         <Route path="/legal/:doc" element={<LegalPage />} />
-        {!COMMUNITY_EDITION && <Route path="/payment/epay" element={<RequireAuth><EpayCheckoutPage /></RequireAuth>} />}
         <Route element={<RequireAuth><AppShell /></RequireAuth>}>
           <Route path="/dashboard" element={<RequirePermission permission={ROUTE_PERMISSIONS["/dashboard"]}><DashboardPage /></RequirePermission>} />
           <Route path="/screener" element={<RequirePermission permission={ROUTE_PERMISSIONS["/screener"]}><ScreenerPage /></RequirePermission>} />
@@ -219,9 +213,6 @@ export default function App() {
           <Route path="/smart-research" element={<RequirePermission permission={ROUTE_PERMISSIONS["/smart-research"]}><SmartResearchPage /></RequirePermission>} />
           <Route path="/agent-analysis" element={<RequirePermission permission={ROUTE_PERMISSIONS["/agent-analysis"]}><AgentAnalysisPage /></RequirePermission>} />
           <Route path="/trading" element={<RequirePermission permission={ROUTE_PERMISSIONS["/trading"]}><TradingPage /></RequirePermission>} />
-          {!COMMUNITY_EDITION && <Route path="/revenue" element={<RequirePermission permission={ROUTE_PERMISSIONS["/revenue"]}><RevenuePage /></RequirePermission>} />}
-          {!COMMUNITY_EDITION && <Route path="/analytics" element={<RequirePermission permission={ROUTE_PERMISSIONS["/analytics"]}><AnalyticsPage /></RequirePermission>} />}
-          {!COMMUNITY_EDITION && <Route path="/token-cost" element={<RequirePermission permission={ROUTE_PERMISSIONS["/token-cost"]}><TokenCostPage /></RequirePermission>} />}
           <Route path="/settings" element={<RequirePermission permission={ROUTE_PERMISSIONS["/settings"]}><SettingsPage /></RequirePermission>} />
           <Route path="/help" element={<Navigate to="/guide" replace />} />
           <Route path="/quote" element={<RequirePermission permission={ROUTE_PERMISSIONS["/quote"]}><QuotePage /></RequirePermission>} />

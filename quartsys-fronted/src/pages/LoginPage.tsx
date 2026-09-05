@@ -21,6 +21,7 @@ import {
   type AuthUser,
 } from "../shared/auth";
 import { LANGUAGE_SELECT_OPTIONS, useLanguage, type LanguageMode } from "../shared/language";
+import { COMMUNITY_EDITION } from "../shared/edition";
 
 type LocalizedText = {
   zh: string;
@@ -64,8 +65,8 @@ declare global {
 }
 
 const BRAND_NAME: LocalizedText = {
-  zh: "AIQuartSmart Community Edition",
-  en: "AIQuartSmart Community Edition",
+  zh: "QaurtSmart",
+  en: "QaurtSmart",
 };
 
 const STATS: Stat[] = [
@@ -405,7 +406,7 @@ export default function LoginPage() {
     : [];
 
   return (
-    <div className="login-page">
+    <div className={COMMUNITY_EDITION ? "login-page community-login-page" : "login-page"}>
       <div className="login-left">
         <div className="glow" />
         <div className="login-brand">
@@ -496,7 +497,7 @@ export default function LoginPage() {
               </h2>
             </div>
             <div className="login-header-actions">
-              <button type="button" className="login-home-btn" onClick={() => navigate("/")} aria-label={lang === "zh" ? "返回AIQuartSmart Community Edition主页" : "Back to AIQuartSmart Community Edition home"} title={lang === "zh" ? "返回主页" : "Back to home"}>
+              <button type="button" className="login-home-btn" onClick={() => navigate("/")} aria-label={lang === "zh" ? "返回QaurtSmart主页" : "Back to QaurtSmart home"} title={lang === "zh" ? "返回主页" : "Back to home"}>
                 <Home size={16} aria-hidden="true" />
               </button>
               <select

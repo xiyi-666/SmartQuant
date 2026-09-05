@@ -5,6 +5,8 @@ import os
 from sqlalchemy.orm import Session
 from models import LLMConfig
 
+DEFAULT_LLM_MODEL = "deepseek-v4-flash"
+
 
 def _first_env(*names: str) -> str | None:
     for name in names:
@@ -63,14 +65,14 @@ def get_llm_config(
     if not cfg:
         return {
             "provider": "openai",
-            "model": fallback_model or "gpt-5.5",
+            "model": fallback_model or DEFAULT_LLM_MODEL,
             "api_key": fallback_api_key if allow_shared_fallback else None,
             "base_url": fallback_base_url if allow_shared_fallback else None,
         }
     api_key = _decrypt_api_key(cfg.api_key)
     return {
         "provider": cfg.provider,
-        "model": cfg.model or fallback_model or "gpt-5.5",
+        "model": cfg.model or fallback_model or DEFAULT_LLM_MODEL,
         "api_key": api_key or (fallback_api_key if allow_shared_fallback else None),
         "base_url": cfg.base_url or (fallback_base_url if allow_shared_fallback else None),
     }

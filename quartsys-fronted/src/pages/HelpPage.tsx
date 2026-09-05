@@ -42,38 +42,38 @@ export default function HelpPage() {
   const appPath = authenticated ? firstAccessiblePath() : "/login";
   const copy = isEnglish
     ? {
-        eyebrow: "PRODUCT DOCUMENTATION",
-        title: "AIQuartSmart Community Edition User Guide",
+        eyebrow: "REFERENCE DOCUMENTATION",
+        title: "QaurtSmart Reference Documentation",
         summary: "A practical guide to market data, factor research, strategy development, backtesting and paper trading.",
         home: "Home",
         app: authenticated ? "Open App" : "Sign In",
         language: "Switch language",
-        picker: "Guide language",
-        loading: "Loading guide...",
-        error: "The guide could not be loaded.",
+        picker: "Reference language",
+        loading: "Loading reference documentation...",
+        error: "The reference documentation could not be loaded.",
       }
     : isTraditional
       ? {
           eyebrow: "產品文件",
-          title: "AIQuartSmart Community Edition 量化分析系統使用指南",
+          title: "QaurtSmart 量化分析系統參考文件",
           summary: "從行情資料開始，完成因子、策略、回測與模擬下單的可追溯研究流程。",
           home: "首頁",
           app: authenticated ? "進入系統" : "登入",
           language: "切換語言",
-          picker: "文件語言",
-          loading: "正在載入使用文件...",
-          error: "使用文件暫時無法載入。",
+          picker: "參考文件語言",
+          loading: "正在載入參考文件...",
+          error: "參考文件暫時無法載入。",
         }
       : {
-          eyebrow: "产品文档",
-          title: "AIQuartSmart Community Edition量化分析系统使用指南",
+          eyebrow: "参考文档",
+          title: "QaurtSmart量化分析系统参考文档",
           summary: "从行情数据开始，完成因子、策略、回测与模拟下单的可追溯研究流程。",
           home: "首页",
           app: authenticated ? "进入系统" : "登录",
           language: "切换语言",
-          picker: "文档语言",
-          loading: "正在加载使用文档...",
-          error: "使用文档暂时无法加载。",
+          picker: "参考文档语言",
+          loading: "正在加载参考文档...",
+          error: "参考文档暂时无法加载。",
         };
 
   useEffect(() => setLocale(initialLocale), [initialLocale]);
@@ -81,6 +81,22 @@ export default function HelpPage() {
   useEffect(() => {
     document.title = copy.title;
   }, [copy.title]);
+
+  useEffect(() => {
+    const updateProgress = () => {
+      const root = document.documentElement;
+      const max = Math.max(1, root.scrollHeight - window.innerHeight);
+      root.style.setProperty("--guide-progress", `${Math.min(100, Math.max(0, (window.scrollY / max) * 100))}%`);
+    };
+    updateProgress();
+    window.addEventListener("scroll", updateProgress, { passive: true });
+    window.addEventListener("resize", updateProgress);
+    return () => {
+      window.removeEventListener("scroll", updateProgress);
+      window.removeEventListener("resize", updateProgress);
+      document.documentElement.style.removeProperty("--guide-progress");
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -115,7 +131,7 @@ export default function HelpPage() {
     <div className="guide-public-page" lang={isEnglish ? "en" : isTraditional ? "zh-Hant" : "zh-CN"}>
       <header className="guide-public-nav">
         <Link className="guide-public-brand" to="/" aria-label={copy.home}>
-          <span><strong>AIQuartSmart Community Edition</strong><small>OPEN QUANT RESEARCH</small></span>
+          <span><strong>QaurtSmart</strong><small>OPEN QUANT RESEARCH</small></span>
         </Link>
         <div className="guide-public-actions">
           <select

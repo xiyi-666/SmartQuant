@@ -640,6 +640,7 @@ LLM_USAGE_MODULE_LABELS: Dict[str, str] = {
 AI_OUTPUT_DISCLAIMER_VERSION = "research-only-v1"
 AI_OUTPUT_DISCLAIMER_TEXT = "仅供研究参考，不构成投资建议"
 LLM_MODEL_TIERS: tuple[str, ...] = ("smart", "advanced", "ultra")
+DEFAULT_LLM_MODEL = str(os.getenv("LLM_MODEL", "deepseek-v4-flash")).strip() or "deepseek-v4-flash"
 LLM_MODEL_TIER_ALIASES: Dict[str, str] = {
     "smart": "smart",
     "智能": "smart",
@@ -1154,9 +1155,9 @@ def _llm_tier_multiplier(value: Any, default: float = 1.0) -> float:
         return default
 
 
-def _default_llm_model_tiers(default_model: str = "gpt-5.5", default_provider: str = "openai") -> dict:
+def _default_llm_model_tiers(default_model: str = DEFAULT_LLM_MODEL, default_provider: str = "openai") -> dict:
     provider = _normalize_llm_provider(default_provider)
-    model = str(default_model or "gpt-5.5").strip() or "gpt-5.5"
+    model = str(default_model or DEFAULT_LLM_MODEL).strip() or DEFAULT_LLM_MODEL
     return {
         "smart": {
             **LLM_MODEL_TIER_LABELS["smart"],
@@ -1470,7 +1471,7 @@ def _configured_llm_pricing_models(db: Session) -> list[dict]:
         else:
             add(default_provider, value)
     if not pairs:
-        add(default_provider, getattr(shared, "model", None) or "gpt-5.5")
+        add(default_provider, getattr(shared, "model", None) or DEFAULT_LLM_MODEL)
     return [{"provider": provider, "model": model} for provider, model in pairs]
 
 
@@ -1943,9 +1944,13 @@ def _sanitize_public_site_settings(value: Optional[dict]) -> dict:
 
 
 def _public_site_settings(db: Session) -> dict:
-    return _sanitize_public_site_settings(
+    settings = _sanitize_public_site_settings(
         _get_system_setting_json(db, PUBLIC_SITE_SETTINGS_KEY, _default_public_site_settings())
     )
+    if COMMUNITY_EDITION:
+        settings["demo_mode_enabled"] = False
+        settings["demo_username"] = ""
+    return settings
 
 
 def _default_auth_security_settings() -> dict:
@@ -13894,7 +13899,7 @@ def create_watchlist_group(
 
 class LLMConfigSchema(BaseModel):
     provider: str = "openai"
-    model: str = "gpt-5.5"
+    model: str = DEFAULT_LLM_MODEL
     api_key: Optional[str] = None
     base_url: Optional[str] = None
     module_models: Optional[Dict[str, Any]] = None
@@ -14654,7 +14659,7 @@ def _default_customer_service_ai_settings() -> dict:
         "display_title": "AIQuartSmart Community Edition 站点助手",
         "use_system_ai": True,
         "provider": "openai",
-        "model": "gpt-5.5",
+        "model": DEFAULT_LLM_MODEL,
         "api_url": "",
         "api_key": "",
         "welcome_message": "你好，我可以介绍本地部署、数据源配置和社区版使用流程。",
@@ -14896,7 +14901,7 @@ def _save_customer_service_ai_settings(db: Session, payload: dict) -> dict:
 
 def _customer_service_effective_llm_config(db: Session, config: dict) -> dict:
     provider = _normalize_llm_provider(config.get("provider"))
-    model = _customer_service_clean_text(config.get("model") or "gpt-5.5", 160)
+    model = _customer_service_clean_text(config.get("model") or DEFAULT_LLM_MODEL, 160)
     api_key = _customer_service_clean_text(config.get("api_key"), 2000)
     base_url = _customer_service_clean_text(config.get("api_url"), 500)
     if config.get("use_system_ai", True):
@@ -14913,7 +14918,7 @@ def _customer_service_effective_llm_config(db: Session, config: dict) -> dict:
             pass
     return {
         "provider": provider,
-        "model": model or "gpt-5.5",
+        "model": model or DEFAULT_LLM_MODEL,
         "api_key": api_key,
         "base_url": base_url or _default_llm_base_url(provider),
     }
@@ -15633,7 +15638,7 @@ def _module_config_model(value: Any, fallback: str) -> str:
     else:
         candidate = value
     model = str(candidate or "").strip()
-    return model or (fallback or "gpt-5.5").strip() or "gpt-5.5"
+    return model or (fallback or DEFAULT_LLM_MODEL).strip() or DEFAULT_LLM_MODEL
 
 
 def _module_config_provider(value: Any, fallback: str) -> str:
@@ -15678,7 +15683,7 @@ def _parse_module_models(raw: Optional[str]) -> dict[str, str]:
 def _sanitize_module_models(
     module_models: Optional[Dict[str, Any]], default_model: str
 ) -> dict[str, str]:
-    fallback = (default_model or "gpt-5.5").strip()
+    fallback = (default_model or DEFAULT_LLM_MODEL).strip()
     result: dict[str, str] = {}
     for key in AI_MODULE_MODEL_KEYS:
         raw_value = module_models.get(key) if isinstance(module_models, dict) else None
@@ -15691,7 +15696,7 @@ def _sanitize_module_model_configs(
     default_model: str,
     default_provider: str,
 ) -> dict[str, dict[str, str]]:
-    fallback_model = (default_model or "gpt-5.5").strip() or "gpt-5.5"
+    fallback_model = (default_model or DEFAULT_LLM_MODEL).strip() or DEFAULT_LLM_MODEL
     fallback_provider = _normalize_llm_provider(default_provider)
     result: dict[str, dict[str, str]] = {}
     for key in AI_MODULE_MODEL_KEYS:
@@ -15705,7 +15710,7 @@ def _sanitize_module_model_configs(
 
 def _legacy_module_models(configs: dict[str, dict[str, str]]) -> dict[str, str]:
     return {
-        key: str(value.get("model") or "gpt-5.5").strip() or "gpt-5.5"
+        key: str(value.get("model") or DEFAULT_LLM_MODEL).strip() or DEFAULT_LLM_MODEL
         for key, value in configs.items()
         if key in AI_MODULE_MODEL_KEYS
     }
@@ -15726,7 +15731,7 @@ def _llm_config_for_module(
         allow_shared_fallback=allow_shared_fallback,
     )
     provider = _normalize_llm_provider(cfg.get("provider"))
-    model = str(cfg.get("model") or "gpt-5.5").strip() or "gpt-5.5"
+    model = str(cfg.get("model") or DEFAULT_LLM_MODEL).strip() or DEFAULT_LLM_MODEL
     row = db.query(LLMConfig).filter(LLMConfig.user_id == user_id).first()
     if row is None and allow_shared_fallback:
         try:
@@ -17461,7 +17466,7 @@ def _run_tradingagents_research(
     from tradingagents.graph.trading_graph import TradingAgentsGraph
 
     provider = _tradingagents_provider_from_cfg(cfg)
-    model = str(cfg.get("model") or "gpt-5.5").strip() or "gpt-5.5"
+    model = str(cfg.get("model") or DEFAULT_LLM_MODEL).strip() or DEFAULT_LLM_MODEL
     api_key = str(cfg.get("api_key") or "").strip()
     base_url = str(cfg.get("base_url") or "").strip() or None
     if provider == "openai" and base_url and "api.openai.com" not in base_url:
@@ -21485,7 +21490,7 @@ def _financial_agent_available_models(db: Session, user: Optional[UserModel] = N
     for tier in _allowed_llm_model_tiers(options, "admin"):
         if tier not in models:
             models.append(tier)
-    return models or ["gpt-5.5"]
+    return models or [DEFAULT_LLM_MODEL]
 
 
 def _financial_agent_validated_model(
@@ -23328,15 +23333,15 @@ LLM_MODEL_OPTIONS_KEY = "llm_model_options"
 
 
 def _default_llm_model_options() -> dict:
-    module_model_configs = _sanitize_module_model_configs({}, "gpt-5.5", "openai")
+    module_model_configs = _sanitize_module_model_configs({}, DEFAULT_LLM_MODEL, "openai")
     module_models = _legacy_module_models(module_model_configs)
     module_model_tiers = _sanitize_module_model_tiers({}, "smart")
     return {
-        "default_model": "gpt-5.5",
-        "models": ["gpt-5.5"],
+        "default_model": DEFAULT_LLM_MODEL,
+        "models": [DEFAULT_LLM_MODEL],
         "module_models": module_models,
         "module_model_tiers": module_model_tiers,
-        "model_tiers": _default_llm_model_tiers("gpt-5.5", "openai"),
+        "model_tiers": _default_llm_model_tiers(DEFAULT_LLM_MODEL, "openai"),
         "notes": "系统管理员维护模型等级、真实模型映射和额度倍率。",
     }
 
@@ -23358,7 +23363,7 @@ def _sanitize_llm_model_options(value: Optional[dict]) -> dict:
     default_model = str(raw.get("default_model") or "").strip()
     add_model(default_model)
     if not models:
-        add_model("gpt-5.5")
+        add_model(DEFAULT_LLM_MODEL)
     default_model = default_model if default_model in seen else models[0]
     module_models = _sanitize_module_models(
         raw.get("module_models") if isinstance(raw.get("module_models"), dict) else {},
@@ -25940,7 +25945,7 @@ def get_llm_config_api(
     key_source = None
     if cfg and cfg.api_key:
         key_source = "database"
-    default_model = effective.get("model") or "gpt-5.5"
+    default_model = effective.get("model") or DEFAULT_LLM_MODEL
     default_provider = _normalize_llm_provider(
         (cfg.provider if cfg else effective.get("provider")) or "openai"
     )
@@ -26100,7 +26105,7 @@ def _llm_test_config(
 
     saved = get_llm_config(db, user_id=None, allow_shared_fallback=True)
     provider = _normalize_llm_provider(data.provider or saved.get("provider"))
-    model = str(data.model or saved.get("model") or "gpt-5.5").strip() or "gpt-5.5"
+    model = str(data.model or saved.get("model") or DEFAULT_LLM_MODEL).strip() or DEFAULT_LLM_MODEL
     base_url = str(
         data.base_url or saved.get("base_url") or _default_llm_base_url(provider)
     ).rstrip("/")
@@ -26141,7 +26146,7 @@ def _raise_llm_ping_error(response: requests.Response) -> None:
 
 def _ping_llm_upstream(cfg: dict) -> dict:
     provider = _normalize_llm_provider(cfg.get("provider"))
-    model = str(cfg.get("model") or "gpt-5.5").strip() or "gpt-5.5"
+    model = str(cfg.get("model") or DEFAULT_LLM_MODEL).strip() or DEFAULT_LLM_MODEL
     api_key = str(cfg.get("api_key") or "").strip()
     base_url = str(cfg.get("base_url") or _default_llm_base_url(provider)).rstrip("/")
     started = time.time()
@@ -28740,7 +28745,7 @@ def _assistant_call_json_llm(
             "ASSISTANT_LLM_READ_TIMEOUT_SECONDS", 180.0, 10.0, 300.0
         )
     )
-    model = cfg.get("model", "gpt-5.5")
+    model = cfg.get("model", DEFAULT_LLM_MODEL)
 
     if provider == "anthropic":
         system_parts = [
@@ -29292,7 +29297,7 @@ def chat_structured(
                 "mode": response_mode,
                 "blocks": build_fallback(fallback_reason),
                 "metadata": {
-                    "model": cfg.get("model", "gpt-5.5"),
+                    "model": cfg.get("model", DEFAULT_LLM_MODEL),
                     "skill": (selected_skill or {}).get("key"),
                     "repaired": repaired,
                     "warnings": warnings,
@@ -29306,7 +29311,7 @@ def chat_structured(
             "mode": response_mode,
             "blocks": blocks,
             "metadata": {
-                "model": cfg.get("model", "gpt-5.5"),
+                "model": cfg.get("model", DEFAULT_LLM_MODEL),
                 "skill": (selected_skill or {}).get("key"),
                 "repaired": repaired,
                 "warnings": warnings,
@@ -29323,7 +29328,7 @@ def chat_structured(
             "mode": response_mode,
             "blocks": build_fallback(detail),
             "metadata": {
-                "model": cfg.get("model", "gpt-5.5"),
+                "model": cfg.get("model", DEFAULT_LLM_MODEL),
                 "skill": (selected_skill or {}).get("key"),
                 "source": "local_fallback",
                 "warnings": [detail],
@@ -29504,7 +29509,7 @@ def chat_structured_stream(
                         "mode": response_mode,
                         "blocks": blocks,
                         "metadata": {
-                            "model": cfg.get("model", "gpt-5.5"),
+                            "model": cfg.get("model", DEFAULT_LLM_MODEL),
                             "skill": (selected_skill or {}).get("key"),
                             "repaired": repaired,
                             "warnings": warnings,
@@ -29523,7 +29528,7 @@ def chat_structured_stream(
                             "mode": response_mode,
                             "blocks": build_fallback(detail),
                             "metadata": {
-                                "model": cfg.get("model", "gpt-5.5"),
+                                "model": cfg.get("model", DEFAULT_LLM_MODEL),
                                 "skill": (selected_skill or {}).get("key"),
                                 "source": "local_fallback",
                                 "warnings": [detail],
@@ -29625,7 +29630,7 @@ def chat_stream(
             client = openai.OpenAI(api_key=cfg["api_key"], base_url=base_url)
             messages = _assistant_messages(system, payload)
             create_kwargs = {
-                "model": cfg.get("model", "gpt-5.5"),
+                "model": cfg.get("model", DEFAULT_LLM_MODEL),
                 "messages": messages,
                 "stream": True,
                 "temperature": 0.4,
@@ -31151,7 +31156,7 @@ def generate_strategy_stream(
                 {"role": "user", "content": user_prompt},
             ]
             create_kwargs = {
-                "model": cfg.get("model", "gpt-5.5"),
+                "model": cfg.get("model", DEFAULT_LLM_MODEL),
                 "messages": messages,
                 "stream": True,
                 "temperature": 0.2,
@@ -32784,24 +32789,41 @@ def _build_risk_trend(
         else []
     )
     stored = {row.date: row for row in rows}
-    points = []
-    for offset in range(days):
-        point_date = start_date + timedelta(days=offset)
-        row = stored.get(point_date)
-        if row:
-            value = round(float(row.value or 0), 2)
-        else:
-            base_context = _risk_context(
-                db,
-                current_user,
-                target_date=point_date,
-                market=market_code,
-            )
-            if base_context.get("score") is None:
-                continue
-            value = round(float(base_context["score"]), 2)
-        points.append({"date": point_date.isoformat(), "value": value})
-    return points
+    # Trend reads are intentionally database-only.  Rebuilding missing dates
+    # from market data during a request made 1D/14D/30D pages wait on providers.
+    # A background/systemic-risk refresh is responsible for writing snapshots;
+    # the API should return the newest persisted values immediately.
+    return [
+        {"date": row.date.isoformat(), "value": round(float(row.value or 0), 2)}
+        for row in rows
+        if row.date is not None
+    ]
+
+
+def _store_risk_trend_snapshot(
+    db: Session,
+    current_user: UserModel,
+    score: Optional[float],
+    *,
+    source: str = "systemic_risk",
+) -> None:
+    if score is None:
+        return
+    today = datetime.now().date()
+    row = (
+        db.query(RiskTrendSnapshot)
+        .filter(
+            RiskTrendSnapshot.user_id == current_user.id,
+            RiskTrendSnapshot.date == today,
+        )
+        .first()
+    )
+    if row is None:
+        row = RiskTrendSnapshot(user_id=current_user.id, date=today)
+        db.add(row)
+    row.value = round(float(score), 2)
+    row.source = source
+    db.commit()
 
 
 def _flow_summary(
@@ -35018,24 +35040,7 @@ def get_risk_trend(
 ):
     market_code = _normalize_market_code(market)
     normalized_days = max(1, min(int(days or 14), 90))
-    cache_key = (
-        f"risk:trend:v1:{current_user.id}:{market_code}:{normalized_days}"
-    )
-    return _coalesced_cached_json(
-        cache_key,
-        lambda: _build_risk_trend(
-            db,
-            current_user,
-            normalized_days,
-            market=market_code,
-        ),
-        ttl=RISK_TREND_CACHE_TTL_SECONDS,
-        stale_ttl=RISK_TREND_STALE_TTL_SECONDS,
-        expected_type=list,
-        lock_timeout=30,
-        wait_timeout=1.5,
-        busy_message="风险趋势系统数据正在刷新，请稍后重试",
-    )
+    return _build_risk_trend(db, current_user, normalized_days, market=market_code)
 
 
 @app.get("/api/risk/systemic", dependencies=[Depends(require_permission("risk.view"))])
@@ -35054,7 +35059,9 @@ def get_risk_systemic(
             db,
         )
     )
-    return _build_systemic_risk_context(db, watched, market=market)
+    context = _build_systemic_risk_context(db, watched, market=market)
+    _store_risk_trend_snapshot(db, current_user, context.get("score"))
+    return context
 
 
 @app.get("/api/risk/sector-options", dependencies=[Depends(require_permission("risk.view"))])

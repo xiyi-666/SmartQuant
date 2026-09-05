@@ -218,7 +218,7 @@ curl -X POST http://localhost:18427/api/llm-config \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{
     "provider": "openai",
-    "model": "gpt-4o-mini",
+    "model": "deepseek-v4-flash",
     "api_key": "sk-xxx",
     "base_url": "https://api.openai.com/v1"
   }'

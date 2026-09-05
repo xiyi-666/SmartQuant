@@ -356,13 +356,13 @@ function normalizeInsightErrorMessage(message: string) {
       lower,
     )
   ) {
-    return `模型服务连接失败：当前模型服务在 HTTPS/TLS 连接或响应超时阶段中断。请检查设置中心「AI配置」里的服务地址是否为 OpenAI 兼容 /v1 地址，API Key 与模型 gpt-5.5 是否匹配，并确认该端点网络稳定。原始错误：${raw}`;
+    return `模型服务连接失败：当前模型服务在 HTTPS/TLS 连接或响应超时阶段中断。请检查设置中心「AI配置」里的服务地址是否为 OpenAI 兼容 /v1 地址，API Key 与当前模型是否匹配，并确认该端点网络稳定。原始错误：${raw}`;
   }
   if (/authentication|incorrect api key|unauthorized|invalid api key|api key|鉴权|401|403/.test(lower)) {
     return `模型鉴权失败：请检查设置中心「AI配置」中的 API Key、服务地址和模型名称是否匹配。原始错误：${raw}`;
   }
   if (/base url|model endpoint|模型端点|not found|404|model/.test(lower)) {
-    return `模型端点配置异常：请确认服务地址以 /v1 结尾或兼容 OpenAI Chat Completions，并确认模型名称 gpt-5.5 可用。原始错误：${raw}`;
+    return `模型端点配置异常：请确认服务地址以 /v1 结尾或兼容 OpenAI Chat Completions，并确认当前模型名称可用。原始错误：${raw}`;
   }
   return raw;
 }
@@ -2115,7 +2115,7 @@ export default function AiInsightsPage() {
       <CommunityFeatureNotice
         title={lt("AI 市场洞察", "AI Market Insights")}
         description={lt("社区版保留模块入口，但不提供平台内置的 AI 市场洞察能力。", "The module remains visible, but built-in AI market insights are not included in the community edition.")}
-        detail={lt("你可以在自己的部署环境接入 AI 服务，并自行实现市场分析、评分和策略逻辑。", "Connect your own AI service in your deployment to implement market analysis, scoring, and strategy logic.")}
+        detail={lt("可在自有部署环境接入 AI 服务，并按实际需求实现市场分析、评分与策略逻辑。", "AI services can be connected in a self-hosted environment to implement market analysis, scoring, and strategy logic as needed.")}
       />
     );
   }

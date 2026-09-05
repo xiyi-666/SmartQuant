@@ -1,3 +1,5 @@
+import { DEFAULT_AI_MODEL } from "./aiDefaults";
+
 export type AiRole = "strategy" | "assistant";
 
 export type AiConfig = {
@@ -230,13 +232,13 @@ export function getDefaultAiConfig(role: AiRole): AiConfig {
     return {
       baseUrl: normalize(env.VITE_STRATEGY_AI_BASE_URL || env.VITE_OPENAI_BASE_URL || "https://api.openai.com/v1"),
       apiKey: normalizeApiKey(env.VITE_STRATEGY_AI_API_KEY || env.VITE_OPENAI_API_KEY || ""),
-      model: String(env.VITE_STRATEGY_AI_MODEL || env.VITE_OPENAI_MODEL || "gpt-4o-mini"),
+      model: String(env.VITE_STRATEGY_AI_MODEL || env.VITE_OPENAI_MODEL || DEFAULT_AI_MODEL),
     };
   }
   return {
     baseUrl: normalize(env.VITE_ASSISTANT_AI_BASE_URL || env.VITE_OPENAI_BASE_URL || "https://api.openai.com/v1"),
     apiKey: normalizeApiKey(env.VITE_ASSISTANT_AI_API_KEY || env.VITE_OPENAI_API_KEY || ""),
-    model: String(env.VITE_ASSISTANT_AI_MODEL || env.VITE_OPENAI_MODEL || "gpt-4o-mini"),
+    model: String(env.VITE_ASSISTANT_AI_MODEL || env.VITE_OPENAI_MODEL || DEFAULT_AI_MODEL),
   };
 }
 

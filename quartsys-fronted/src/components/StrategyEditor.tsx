@@ -43,7 +43,7 @@ function saveStrategySystemPrompt(v: string) {
 
 function parseStrategyHtml(input: string): ParsedStrategyHtml {
   const doc = new DOMParser().parseFromString(input, "text/html");
-  const title = doc.title || "AIQuartSmart Community Edition | AI 策略";
+  const title = doc.title || "QaurtSmart | AI 策略";
   const styleTexts = Array.from(doc.querySelectorAll("head style"))
     .map((s) => s.textContent || "")
     .filter(Boolean);
@@ -69,7 +69,7 @@ function parseStrategyHtml(input: string): ParsedStrategyHtml {
 function localizeLegacyTitle(title: string, lang: "zh" | "en") {
   if (lang === "zh") return title;
   return title
-    .replace(/AIQuartSmart Community Edition/g, "AIQuartSmart Community Edition")
+    .replace(/QaurtSmart/g, "QaurtSmart")
     .replace(/量化交易系统/g, "Quant Trading System")
     .replace(/AI 策略/g, "AI Strategy");
 }

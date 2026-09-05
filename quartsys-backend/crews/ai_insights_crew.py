@@ -39,7 +39,7 @@ def _friendly_error_summary(message: str) -> str:
         return (
             "分析失败：模型服务连接失败。当前 Base URL 在 HTTPS/TLS 连接或响应阶段中断，"
             "请检查设置中心「AI配置」中的服务地址是否为 OpenAI 兼容 /v1 地址，"
-            f"API Key 与模型 gpt-5.5 是否匹配。错误信息：{message}"
+            f"API Key 与当前模型是否匹配。错误信息：{message}"
         )
     if any(
         marker in lower

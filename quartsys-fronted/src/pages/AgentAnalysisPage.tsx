@@ -36,6 +36,7 @@ import {
 import { api } from "../api";
 import { getAuthUser, getToken } from "../shared/auth";
 import { aiModelOptionLabel, AiModelInput, useAiModelSelection } from "../shared/aiModels";
+import { DEFAULT_AI_MODEL } from "../shared/aiDefaults";
 import { useLanguage } from "../shared/language";
 import { MARKET_DEFINITIONS, normalizeMarket, useMarket } from "../shared/market";
 import { useTheme } from "../shared/theme";
@@ -188,7 +189,7 @@ const DEFAULT_CAPABILITIES: AgentCapabilities = {
   max_initial_rounds: 1,
   max_session_rounds: 50,
   mcp_mode: "none",
-  available_models: ["gpt-5.5"],
+  available_models: [DEFAULT_AI_MODEL],
   approved_mcp_servers: [],
   costs: { per_agent_round: 20, moderator_summary: 20 },
   credit_summary: {},
@@ -718,7 +719,7 @@ export default function AgentAnalysisPage() {
       setCapabilities(nextCapabilities);
       setMcpSettingsDraft(nextCapabilities.approved_mcp_servers.map((server) => ({ ...server })));
       if (!nextCapabilities.can_enter_custom_model && !nextCapabilities.available_models.includes(selectedModel)) {
-        setSelectedModel(nextCapabilities.available_models[0] || "gpt-5.5");
+        setSelectedModel(nextCapabilities.available_models[0] || DEFAULT_AI_MODEL);
       }
       const preferredSession = nextSessions.find(
         (session: AnalysisSession) => normalizeMarket(session.market) === market,
@@ -836,7 +837,7 @@ export default function AgentAnalysisPage() {
       ? selectedModel
       : availableModels.includes(selectedModel)
         ? selectedModel
-        : availableModels[0] || "gpt-5.5";
+        : availableModels[0] || DEFAULT_AI_MODEL;
     setSessionDraft({
       title: "",
       subject_type: "stock",
